@@ -1,11 +1,12 @@
 /**
  * A single item in the user's list, together with whether it has been done.
  * <p>
- * Introduced by the A-Classes extension: before this, items were plain
- * Strings, which left no place to keep the done/not-done state alongside the
- * description.
+ * This is the parent of the three concrete task types introduced by the
+ * A-Inheritance extension. It is abstract because every real task is a todo,
+ * a deadline or an event: a task with no type would have nothing to show in
+ * its type box.
  */
-public class Task {
+public abstract class Task {
 
     /** What the user asked to be reminded of. */
     protected String description;
@@ -22,6 +23,16 @@ public class Task {
         this.description = description;
         this.isDone = false;
     }
+
+    /**
+     * Returns the single character shown in the type box, e.g. "T" for a todo.
+     * <p>
+     * Each subclass supplies its own, so adding a new task type does not mean
+     * editing a type-checking branch elsewhere in the code.
+     *
+     * @return the one-character type marker
+     */
+    public abstract String getTypeIcon();
 
     /**
      * Returns the single character shown inside the status box.
@@ -43,10 +54,11 @@ public class Task {
     }
 
     /**
-     * Returns the task as the user sees it, e.g. {@code [X] read book}.
+     * Returns the task as the user sees it, e.g. {@code [T][X] read book}.
+     * Subclasses that carry dates append them to this.
      */
     @Override
     public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
+        return "[" + getTypeIcon() + "][" + getStatusIcon() + "] " + description;
     }
 }

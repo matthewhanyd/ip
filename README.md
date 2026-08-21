@@ -32,23 +32,39 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    What can I do for you?
    ____________________________________________________________
    ```
-   The bot then waits for your commands. Any text you enter is remembered as a
-   task; `list` shows them, `mark N` / `unmark N` change a task's status, and
-   `bye` exits:
+   The bot then waits for your commands. It tracks three kinds of task --
+   `todo`, `deadline` and `event` -- and `mark N` / `unmark N` change a task's
+   status. `list` shows everything, and `bye` exits:
    ```
-   read book
+   todo read book
    ____________________________________________________________
-   added: read book
+   Got it. I've added this task:
+     [T][ ] read book
+   Now you have 1 task in the list.
+   ____________________________________________________________
+   deadline return book /by Sunday
+   ____________________________________________________________
+   Got it. I've added this task:
+     [D][ ] return book (by: Sunday)
+   Now you have 2 tasks in the list.
+   ____________________________________________________________
+   event project meeting /from Mon 2pm /to 4pm
+   ____________________________________________________________
+   Got it. I've added this task:
+     [E][ ] project meeting (from: Mon 2pm to: 4pm)
+   Now you have 3 tasks in the list.
    ____________________________________________________________
    mark 1
    ____________________________________________________________
    Nice! I've marked this task as done:
-     [X] read book
+     [T][X] read book
    ____________________________________________________________
    list
    ____________________________________________________________
    Here are the tasks in your list:
-   1.[X] read book
+   1.[T][X] read book
+   2.[D][ ] return book (by: Sunday)
+   3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
    ____________________________________________________________
    bye
    ____________________________________________________________

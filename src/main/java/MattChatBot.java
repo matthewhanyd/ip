@@ -3,8 +3,9 @@ import java.util.Scanner;
 /**
  * Entry point of the MattChatBot chatbot.
  * <p>
- * At this stage (Level-3) the bot stores tasks, lists them with their
- * done/not-done status, and lets the user mark and unmark them.
+ * At this stage (Level-4) the bot tracks three kinds of task -- todos,
+ * deadlines and events -- lists them with their status, and lets the user
+ * mark and unmark them.
  */
 public class MattChatBot {
 
@@ -60,11 +61,11 @@ public class MattChatBot {
             if (input.isEmpty()) {
                 continue;
             }
-            // Split off the first word so that "mark 2" can be told apart from
-            // a task that merely happens to start with the word "mark".
+            // Split off the first word, so that a command word can be told
+            // apart from a description that merely starts with the same word.
             String[] parts = input.split("\\s+", 2);
             String command = parts[0].toLowerCase();
-            String argument = parts.length > 1 ? parts[1] : "";
+            String argument = parts.length > 1 ? parts[1].trim() : "";
 
             switch (command) {
             case "bye" -> {
@@ -73,27 +74,83 @@ public class MattChatBot {
             case "list" -> listTasks();
             case "mark" -> setDone(argument, true);
             case "unmark" -> setDone(argument, false);
-            default -> addTask(input);
+            case "todo" -> addTodo(argument);
+            case "deadline" -> addDeadline(argument);
+            case "event" -> addEvent(argument);
+            default -> say("Sorry, I don't know what \"" + command + "\" means.",
+                    "Try: todo, deadline, event, list, mark, unmark, bye");
             }
         }
     }
 
     /**
+     * Adds a todo.
+     *
+     * @param argument the description, as the user typed it
+     */
+    private static void addTodo(String argument) {
+        if (argument.isEmpty()) {
+            say("A todo needs a description, e.g. todo borrow book");
+            return;
+        }
+        addTask(new Todo(argument));
+    }
+
+    /**
+     * Adds a deadline, whose argument has the form
+     * {@code <description> /by <when>}.
+     *
+     * @param argument the description and due time, as the user typed them
+     */
+    private static void addDeadline(String argument) {
+        String[] parts = argument.split(" /by ", 2);
+        if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
+            say("A deadline needs a description and a /by, "
+                    + "e.g. deadline return book /by Sunday");
+            return;
+        }
+        addTask(new Deadline(parts[0].trim(), parts[1].trim()));
+    }
+
+    /**
+     * Adds an event, whose argument has the form
+     * {@code <description> /from <start> /to <end>}.
+     *
+     * @param argument the description and time range, as the user typed them
+     */
+    private static void addEvent(String argument) {
+        String[] afterFrom = argument.split(" /from ", 2);
+        String[] fromAndTo = afterFrom.length < 2
+                ? new String[0]
+                : afterFrom[1].split(" /to ", 2);
+        if (afterFrom[0].isBlank() || fromAndTo.length < 2
+                || fromAndTo[0].isBlank() || fromAndTo[1].isBlank()) {
+            say("An event needs a description, a /from and a /to, "
+                    + "e.g. event project meeting /from Mon 2pm /to 4pm");
+            return;
+        }
+        addTask(new Event(afterFrom[0].trim(), fromAndTo[0].trim(), fromAndTo[1].trim()));
+    }
+
+    /**
      * Stores one task and confirms it to the user.
      *
-     * @param description the text to store
+     * @param task the task to store
      */
-    private static void addTask(String description) {
+    private static void addTask(Task task) {
         if (taskCount == MAX_TASKS) {
             say("Sorry, I can only remember " + MAX_TASKS + " things at a time.");
             return;
         }
-        tasks[taskCount] = new Task(description);
+        tasks[taskCount] = task;
         taskCount++;
-        say("added: " + description);
+        say("Got it. I've added this task:",
+                "  " + task,
+                "Now you have " + taskCount + (taskCount == 1 ? " task" : " tasks")
+                        + " in the list.");
     }
 
-    /** Prints every stored task, numbered from 1, with its status. */
+    /** Prints every stored task, numbered from 1, with its type and status. */
     private static void listTasks() {
         if (taskCount == 0) {
             say("You haven't told me anything to remember yet.");
