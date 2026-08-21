@@ -72,6 +72,15 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ____________________________________________________________
    ```
 
+   If a command is not understood, or is missing a part it needs, the bot says
+   what was wrong and how to write it instead:
+   ```
+   deadline /by Sunday
+   ____________________________________________________________
+   A deadline needs a description before the /by. Try: deadline return book /by Sunday
+   ____________________________________________________________
+   ```
+
 ## Running from the command line
 
 ```

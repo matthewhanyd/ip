@@ -3,14 +3,23 @@ import java.util.Scanner;
 /**
  * Entry point of the MattChatBot chatbot.
  * <p>
- * At this stage (Level-4) the bot tracks three kinds of task -- todos,
- * deadlines and events -- lists them with their status, and lets the user
- * mark and unmark them.
+ * At this stage (Level-5) the bot tracks todos, deadlines and events, lets
+ * the user mark and unmark them, and reports bad input as a clear message
+ * instead of crashing or silently doing the wrong thing.
  */
 public class MattChatBot {
 
     /** Name the chatbot introduces itself with. */
     private static final String NAME = "MattChatBot";
+
+    /** Keyword separating a deadline's description from its due date. */
+    private static final String KEYWORD_BY = "/by";
+
+    /** Keyword separating an event's description from its start time. */
+    private static final String KEYWORD_FROM = "/from";
+
+    /** Keyword separating an event's start time from its end time. */
+    private static final String KEYWORD_TO = "/to";
 
     /** Maximum number of tasks that can be stored, as allowed by the requirements. */
     private static final int MAX_TASKS = 100;
@@ -48,7 +57,12 @@ public class MattChatBot {
 
     /**
      * Reads user input line by line and acts on it, stopping when the user
-     * enters the bye command.
+     * says bye.
+     * <p>
+     * This is the single place where a {@link MattChatBotException} is turned
+     * into a reply: the command methods below describe what went wrong and
+     * throw, and this loop reports it and carries on with the next command, so
+     * one bad input never ends the session.
      * <p>
      * The loop also stops if the input stream ends (e.g. the user presses
      * Ctrl-D, or input is piped in from a file), so the bot exits cleanly
@@ -61,37 +75,59 @@ public class MattChatBot {
             if (input.isEmpty()) {
                 continue;
             }
-            // Split off the first word, so that a command word can be told
-            // apart from a description that merely starts with the same word.
-            String[] parts = input.split("\\s+", 2);
-            String command = parts[0].toLowerCase();
-            String argument = parts.length > 1 ? parts[1].trim() : "";
-
-            switch (command) {
-            case "bye" -> {
-                return;
-            }
-            case "list" -> listTasks();
-            case "mark" -> setDone(argument, true);
-            case "unmark" -> setDone(argument, false);
-            case "todo" -> addTodo(argument);
-            case "deadline" -> addDeadline(argument);
-            case "event" -> addEvent(argument);
-            default -> say("Sorry, I don't know what \"" + command + "\" means.",
-                    "Try: todo, deadline, event, list, mark, unmark, bye");
+            try {
+                boolean isExit = handleCommand(input);
+                if (isExit) {
+                    return;
+                }
+            } catch (MattChatBotException e) {
+                say(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Carries out one command.
+     *
+     * @param input one non-empty line as the user typed it
+     * @return true if the user asked to exit
+     * @throws MattChatBotException if the command is unknown, or is missing a
+     *                              part that it needs
+     */
+    private static boolean handleCommand(String input) throws MattChatBotException {
+        // Split off the first word, so that a command word can be told apart
+        // from a description that merely starts with the same word.
+        String[] parts = input.split("\\s+", 2);
+        String command = parts[0].toLowerCase();
+        String argument = parts.length > 1 ? parts[1].trim() : "";
+
+        switch (command) {
+        case "bye" -> {
+            return true;
+        }
+        case "list" -> listTasks();
+        case "mark" -> setDone(argument, true);
+        case "unmark" -> setDone(argument, false);
+        case "todo" -> addTodo(argument);
+        case "deadline" -> addDeadline(argument);
+        case "event" -> addEvent(argument);
+        default -> throw new MattChatBotException(
+                "I don't know what \"" + command + "\" means. "
+                        + "I understand: todo, deadline, event, list, mark, unmark, bye");
+        }
+        return false;
     }
 
     /**
      * Adds a todo.
      *
      * @param argument the description, as the user typed it
+     * @throws MattChatBotException if the description is missing
      */
-    private static void addTodo(String argument) {
+    private static void addTodo(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
-            say("A todo needs a description, e.g. todo borrow book");
-            return;
+            throw new MattChatBotException(
+                    "A todo needs a description. Try: todo borrow book");
         }
         addTask(new Todo(argument));
     }
@@ -101,15 +137,26 @@ public class MattChatBot {
      * {@code <description> /by <when>}.
      *
      * @param argument the description and due time, as the user typed them
+     * @throws MattChatBotException if the description or the /by part is missing
      */
-    private static void addDeadline(String argument) {
-        String[] parts = argument.split(" /by ", 2);
-        if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
-            say("A deadline needs a description and a /by, "
-                    + "e.g. deadline return book /by Sunday");
-            return;
+    private static void addDeadline(String argument) throws MattChatBotException {
+        String example = "Try: deadline return book /by Sunday";
+        int byAt = argument.indexOf(KEYWORD_BY);
+        if (byAt < 0) {
+            throw new MattChatBotException(
+                    "A deadline needs a /by, so I know when it is due. " + example);
         }
-        addTask(new Deadline(parts[0].trim(), parts[1].trim()));
+        String description = argument.substring(0, byAt).trim();
+        String by = argument.substring(byAt + KEYWORD_BY.length()).trim();
+        if (description.isEmpty()) {
+            throw new MattChatBotException(
+                    "A deadline needs a description before the /by. " + example);
+        }
+        if (by.isEmpty()) {
+            throw new MattChatBotException(
+                    "A deadline needs a date or time after the /by. " + example);
+        }
+        addTask(new Deadline(description, by));
     }
 
     /**
@@ -117,30 +164,50 @@ public class MattChatBot {
      * {@code <description> /from <start> /to <end>}.
      *
      * @param argument the description and time range, as the user typed them
+     * @throws MattChatBotException if the description, the /from or the /to is missing
      */
-    private static void addEvent(String argument) {
-        String[] afterFrom = argument.split(" /from ", 2);
-        String[] fromAndTo = afterFrom.length < 2
-                ? new String[0]
-                : afterFrom[1].split(" /to ", 2);
-        if (afterFrom[0].isBlank() || fromAndTo.length < 2
-                || fromAndTo[0].isBlank() || fromAndTo[1].isBlank()) {
-            say("An event needs a description, a /from and a /to, "
-                    + "e.g. event project meeting /from Mon 2pm /to 4pm");
-            return;
+    private static void addEvent(String argument) throws MattChatBotException {
+        String example = "Try: event project meeting /from Mon 2pm /to 4pm";
+        int fromAt = argument.indexOf(KEYWORD_FROM);
+        if (fromAt < 0) {
+            throw new MattChatBotException(
+                    "An event needs a /from, so I know when it starts. " + example);
         }
-        addTask(new Event(afterFrom[0].trim(), fromAndTo[0].trim(), fromAndTo[1].trim()));
+        // Look for /to only after /from, so that a description mentioning "/to"
+        // does not get mistaken for the end time.
+        int toAt = argument.indexOf(KEYWORD_TO, fromAt + KEYWORD_FROM.length());
+        if (toAt < 0) {
+            throw new MattChatBotException(
+                    "An event needs a /to, so I know when it ends. " + example);
+        }
+        String description = argument.substring(0, fromAt).trim();
+        String from = argument.substring(fromAt + KEYWORD_FROM.length(), toAt).trim();
+        String to = argument.substring(toAt + KEYWORD_TO.length()).trim();
+        if (description.isEmpty()) {
+            throw new MattChatBotException(
+                    "An event needs a description before the /from. " + example);
+        }
+        if (from.isEmpty()) {
+            throw new MattChatBotException(
+                    "An event needs a start time after the /from. " + example);
+        }
+        if (to.isEmpty()) {
+            throw new MattChatBotException(
+                    "An event needs an end time after the /to. " + example);
+        }
+        addTask(new Event(description, from, to));
     }
 
     /**
      * Stores one task and confirms it to the user.
      *
      * @param task the task to store
+     * @throws MattChatBotException if the list is already full
      */
-    private static void addTask(Task task) {
+    private static void addTask(Task task) throws MattChatBotException {
         if (taskCount == MAX_TASKS) {
-            say("Sorry, I can only remember " + MAX_TASKS + " things at a time.");
-            return;
+            throw new MattChatBotException("My list is full at " + MAX_TASKS
+                    + " tasks, so I can't add another one.");
         }
         tasks[taskCount] = task;
         taskCount++;
@@ -153,7 +220,7 @@ public class MattChatBot {
     /** Prints every stored task, numbered from 1, with its type and status. */
     private static void listTasks() {
         if (taskCount == 0) {
-            say("You haven't told me anything to remember yet.");
+            say("Your list is empty. Add something with todo, deadline or event.");
             return;
         }
         String[] lines = new String[taskCount + 1];
@@ -169,12 +236,12 @@ public class MattChatBot {
      *
      * @param argument the task number as the user typed it, 1-based
      * @param isDone   true to mark the task done, false to reverse it
+     * @throws MattChatBotException if the number is missing, not a number, or
+     *                              outside the list
      */
-    private static void setDone(String argument, boolean isDone) {
-        int index = parseTaskNumber(argument);
-        if (index < 0) {
-            return;
-        }
+    private static void setDone(String argument, boolean isDone)
+            throws MattChatBotException {
+        int index = parseTaskNumber(argument, isDone ? "mark" : "unmark");
         Task task = tasks[index];
         if (isDone) {
             task.markAsDone();
@@ -186,23 +253,35 @@ public class MattChatBot {
     }
 
     /**
-     * Converts what the user typed into a valid index into {@link #tasks},
-     * explaining the problem to the user if it is not usable.
+     * Converts what the user typed into a valid index into {@link #tasks}.
      *
      * @param argument the task number as the user typed it, 1-based
-     * @return the matching 0-based index, or -1 if the input was not usable
+     * @param command  the command being run, used to make the message specific
+     * @return the matching 0-based index
+     * @throws MattChatBotException if the number is missing, not a number, or
+     *                              outside the list
      */
-    private static int parseTaskNumber(String argument) {
+    private static int parseTaskNumber(String argument, String command)
+            throws MattChatBotException {
+        if (argument.isEmpty()) {
+            throw new MattChatBotException("Which task should I " + command
+                    + "? Try: " + command + " 2");
+        }
         int number;
         try {
-            number = Integer.parseInt(argument.trim());
+            number = Integer.parseInt(argument);
         } catch (NumberFormatException e) {
-            say("Please give me a task number, e.g. mark 2");
-            return -1;
+            throw new MattChatBotException("\"" + argument
+                    + "\" is not a task number. Try: " + command + " 2");
+        }
+        if (taskCount == 0) {
+            throw new MattChatBotException(
+                    "Your list is empty, so there is no task " + number + " yet.");
         }
         if (number < 1 || number > taskCount) {
-            say("You don't have a task " + number + ". Type list to see what you have.");
-            return -1;
+            throw new MattChatBotException("You have " + taskCount
+                    + (taskCount == 1 ? " task" : " tasks")
+                    + ", so there is no task " + number + ". Type list to see them.");
         }
         return number - 1;
     }
