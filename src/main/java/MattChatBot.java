@@ -89,6 +89,11 @@ public class MattChatBot {
 
     /**
      * Carries out one command.
+     * <p>
+     * Written as a switch expression over {@link Command} rather than a switch
+     * statement over strings: because every case yields the exit flag, the
+     * compiler requires the switch to cover every command, so adding a command
+     * to the enum will not compile until it is handled here.
      *
      * @param input one non-empty line as the user typed it
      * @return true if the user asked to exit
@@ -99,25 +104,40 @@ public class MattChatBot {
         // Split off the first word, so that a command word can be told apart
         // from a description that merely starts with the same word.
         String[] parts = input.split("\\s+", 2);
-        String command = parts[0].toLowerCase();
+        Command command = Command.fromKeyword(parts[0]);
         String argument = parts.length > 1 ? parts[1].trim() : "";
 
-        switch (command) {
-        case "bye" -> {
-            return true;
+        return switch (command) {
+        case BYE -> true;
+        case LIST -> {
+            listTasks();
+            yield false;
         }
-        case "list" -> listTasks();
-        case "mark" -> setDone(argument, true);
-        case "unmark" -> setDone(argument, false);
-        case "delete" -> deleteTask(argument);
-        case "todo" -> addTodo(argument);
-        case "deadline" -> addDeadline(argument);
-        case "event" -> addEvent(argument);
-        default -> throw new MattChatBotException(
-                "I don't know what \"" + command + "\" means. I understand: "
-                        + "todo, deadline, event, list, mark, unmark, delete, bye");
+        case MARK -> {
+            setDone(argument, true);
+            yield false;
         }
-        return false;
+        case UNMARK -> {
+            setDone(argument, false);
+            yield false;
+        }
+        case DELETE -> {
+            deleteTask(argument);
+            yield false;
+        }
+        case TODO -> {
+            addTodo(argument);
+            yield false;
+        }
+        case DEADLINE -> {
+            addDeadline(argument);
+            yield false;
+        }
+        case EVENT -> {
+            addEvent(argument);
+            yield false;
+        }
+        };
     }
 
     /**
@@ -129,7 +149,8 @@ public class MattChatBot {
     private static void addTodo(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
             throw new MattChatBotException(
-                    "A todo needs a description. Try: todo borrow book");
+                    "A todo needs a description. Try: "
+                            + Command.TODO.getKeyword() + " borrow book");
         }
         addTask(new Todo(argument));
     }
@@ -142,7 +163,8 @@ public class MattChatBot {
      * @throws MattChatBotException if the description or the /by part is missing
      */
     private static void addDeadline(String argument) throws MattChatBotException {
-        String example = "Try: deadline return book /by Sunday";
+        String example = "Try: " + Command.DEADLINE.getKeyword()
+                + " return book /by Sunday";
         int byAt = argument.indexOf(KEYWORD_BY);
         if (byAt < 0) {
             throw new MattChatBotException(
@@ -169,7 +191,8 @@ public class MattChatBot {
      * @throws MattChatBotException if the description, the /from or the /to is missing
      */
     private static void addEvent(String argument) throws MattChatBotException {
-        String example = "Try: event project meeting /from Mon 2pm /to 4pm";
+        String example = "Try: " + Command.EVENT.getKeyword()
+                + " project meeting /from Mon 2pm /to 4pm";
         int fromAt = argument.indexOf(KEYWORD_FROM);
         if (fromAt < 0) {
             throw new MattChatBotException(
@@ -218,7 +241,7 @@ public class MattChatBot {
      *                              outside the list
      */
     private static void deleteTask(String argument) throws MattChatBotException {
-        int index = parseTaskNumber(argument, "delete");
+        int index = parseTaskNumber(argument, Command.DELETE);
         Task removed = tasks.remove(index);
         say("Noted. I've removed this task:", "  " + removed, countSummary());
     }
@@ -226,7 +249,9 @@ public class MattChatBot {
     /** Prints every stored task, numbered from 1, with its type and status. */
     private static void listTasks() {
         if (tasks.isEmpty()) {
-            say("Your list is empty. Add something with todo, deadline or event.");
+            say("Your list is empty. Add something with "
+                    + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
+                    + " or " + Command.EVENT.getKeyword() + ".");
             return;
         }
         String[] lines = new String[tasks.size() + 1];
@@ -247,7 +272,7 @@ public class MattChatBot {
      */
     private static void setDone(String argument, boolean isDone)
             throws MattChatBotException {
-        int index = parseTaskNumber(argument, isDone ? "mark" : "unmark");
+        int index = parseTaskNumber(argument, isDone ? Command.MARK : Command.UNMARK);
         Task task = tasks.get(index);
         if (isDone) {
             task.markAsDone();
@@ -262,23 +287,24 @@ public class MattChatBot {
      * Converts what the user typed into a valid index into {@link #tasks}.
      *
      * @param argument the task number as the user typed it, 1-based
-     * @param command  the command being run, used to make the message specific
+     * @param command  the command being run, so the message can name it
      * @return the matching 0-based index
      * @throws MattChatBotException if the number is missing, not a number, or
      *                              outside the list
      */
-    private static int parseTaskNumber(String argument, String command)
+    private static int parseTaskNumber(String argument, Command command)
             throws MattChatBotException {
+        String keyword = command.getKeyword();
         if (argument.isEmpty()) {
-            throw new MattChatBotException("Which task should I " + command
-                    + "? Try: " + command + " 2");
+            throw new MattChatBotException("Which task should I " + keyword
+                    + "? Try: " + keyword + " 2");
         }
         int number;
         try {
             number = Integer.parseInt(argument);
         } catch (NumberFormatException e) {
             throw new MattChatBotException("\"" + argument
-                    + "\" is not a task number. Try: " + command + " 2");
+                    + "\" is not a task number. Try: " + keyword + " 2");
         }
         if (tasks.isEmpty()) {
             throw new MattChatBotException(
@@ -286,7 +312,8 @@ public class MattChatBot {
         }
         if (number < 1 || number > tasks.size()) {
             throw new MattChatBotException("You have " + describeCount()
-                    + ", so there is no task " + number + ". Type list to see them.");
+                    + ", so there is no task " + number + ". Type "
+                    + Command.LIST.getKeyword() + " to see them.");
         }
         return number - 1;
     }
