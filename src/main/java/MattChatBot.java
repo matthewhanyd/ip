@@ -1,10 +1,11 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
  * Entry point of the MattChatBot chatbot.
  * <p>
- * At this stage (Level-5) the bot tracks todos, deadlines and events, lets
- * the user mark and unmark them, and reports bad input as a clear message
+ * At this stage (Level-6) the bot tracks todos, deadlines and events, lets the
+ * user mark, unmark and delete them, and reports bad input as a clear message
  * instead of crashing or silently doing the wrong thing.
  */
 public class MattChatBot {
@@ -20,9 +21,6 @@ public class MattChatBot {
 
     /** Keyword separating an event's start time from its end time. */
     private static final String KEYWORD_TO = "/to";
-
-    /** Maximum number of tasks that can be stored, as allowed by the requirements. */
-    private static final int MAX_TASKS = 100;
 
     /** Horizontal rule printed around each block of the bot's output. */
     private static final String DIVIDER =
@@ -43,11 +41,14 @@ public class MattChatBot {
              CCC   H   H  A   A    T    BBBB    OOO     T
             """;
 
-    /** Tasks the user has stored, filled from index 0 upwards. */
-    private static final Task[] tasks = new Task[MAX_TASKS];
-
-    /** How many entries of {@link #tasks} are actually in use. */
-    private static int taskCount = 0;
+    /**
+     * Tasks the user has stored, in the order they were added.
+     * <p>
+     * An ArrayList rather than a fixed array (the A-Collections extension): it
+     * grows as needed, so there is no 100-task ceiling, and it closes the gap
+     * itself when a task is deleted.
+     */
+    private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         greet();
@@ -108,12 +109,13 @@ public class MattChatBot {
         case "list" -> listTasks();
         case "mark" -> setDone(argument, true);
         case "unmark" -> setDone(argument, false);
+        case "delete" -> deleteTask(argument);
         case "todo" -> addTodo(argument);
         case "deadline" -> addDeadline(argument);
         case "event" -> addEvent(argument);
         default -> throw new MattChatBotException(
-                "I don't know what \"" + command + "\" means. "
-                        + "I understand: todo, deadline, event, list, mark, unmark, bye");
+                "I don't know what \"" + command + "\" means. I understand: "
+                        + "todo, deadline, event, list, mark, unmark, delete, bye");
         }
         return false;
     }
@@ -202,31 +204,35 @@ public class MattChatBot {
      * Stores one task and confirms it to the user.
      *
      * @param task the task to store
-     * @throws MattChatBotException if the list is already full
      */
-    private static void addTask(Task task) throws MattChatBotException {
-        if (taskCount == MAX_TASKS) {
-            throw new MattChatBotException("My list is full at " + MAX_TASKS
-                    + " tasks, so I can't add another one.");
-        }
-        tasks[taskCount] = task;
-        taskCount++;
-        say("Got it. I've added this task:",
-                "  " + task,
-                "Now you have " + taskCount + (taskCount == 1 ? " task" : " tasks")
-                        + " in the list.");
+    private static void addTask(Task task) {
+        tasks.add(task);
+        say("Got it. I've added this task:", "  " + task, countSummary());
+    }
+
+    /**
+     * Removes the task at the given position and confirms it to the user.
+     *
+     * @param argument the task number as the user typed it, 1-based
+     * @throws MattChatBotException if the number is missing, not a number, or
+     *                              outside the list
+     */
+    private static void deleteTask(String argument) throws MattChatBotException {
+        int index = parseTaskNumber(argument, "delete");
+        Task removed = tasks.remove(index);
+        say("Noted. I've removed this task:", "  " + removed, countSummary());
     }
 
     /** Prints every stored task, numbered from 1, with its type and status. */
     private static void listTasks() {
-        if (taskCount == 0) {
+        if (tasks.isEmpty()) {
             say("Your list is empty. Add something with todo, deadline or event.");
             return;
         }
-        String[] lines = new String[taskCount + 1];
+        String[] lines = new String[tasks.size() + 1];
         lines[0] = "Here are the tasks in your list:";
-        for (int i = 0; i < taskCount; i++) {
-            lines[i + 1] = (i + 1) + "." + tasks[i];
+        for (int i = 0; i < tasks.size(); i++) {
+            lines[i + 1] = (i + 1) + "." + tasks.get(i);
         }
         say(lines);
     }
@@ -242,7 +248,7 @@ public class MattChatBot {
     private static void setDone(String argument, boolean isDone)
             throws MattChatBotException {
         int index = parseTaskNumber(argument, isDone ? "mark" : "unmark");
-        Task task = tasks[index];
+        Task task = tasks.get(index);
         if (isDone) {
             task.markAsDone();
             say("Nice! I've marked this task as done:", "  " + task);
@@ -274,16 +280,31 @@ public class MattChatBot {
             throw new MattChatBotException("\"" + argument
                     + "\" is not a task number. Try: " + command + " 2");
         }
-        if (taskCount == 0) {
+        if (tasks.isEmpty()) {
             throw new MattChatBotException(
                     "Your list is empty, so there is no task " + number + " yet.");
         }
-        if (number < 1 || number > taskCount) {
-            throw new MattChatBotException("You have " + taskCount
-                    + (taskCount == 1 ? " task" : " tasks")
+        if (number < 1 || number > tasks.size()) {
+            throw new MattChatBotException("You have " + describeCount()
                     + ", so there is no task " + number + ". Type list to see them.");
         }
         return number - 1;
+    }
+
+    /**
+     * Returns the sentence reporting how many tasks remain, e.g.
+     * {@code Now you have 4 tasks in the list.}
+     */
+    private static String countSummary() {
+        return "Now you have " + describeCount() + " in the list.";
+    }
+
+    /**
+     * Returns the task count with the right singular or plural noun, e.g.
+     * {@code 1 task} or {@code 4 tasks}.
+     */
+    private static String describeCount() {
+        return tasks.size() + (tasks.size() == 1 ? " task" : " tasks");
     }
 
     /** Prints the banner and the welcome message. */

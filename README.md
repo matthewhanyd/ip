@@ -33,8 +33,8 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ____________________________________________________________
    ```
    The bot then waits for your commands. It tracks three kinds of task --
-   `todo`, `deadline` and `event` -- and `mark N` / `unmark N` change a task's
-   status. `list` shows everything, and `bye` exits:
+   `todo`, `deadline` and `event`. `mark N` / `unmark N` change a task's
+   status, `delete N` removes one, `list` shows everything, and `bye` exits:
    ```
    todo read book
    ____________________________________________________________
@@ -65,6 +65,12 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    1.[T][X] read book
    2.[D][ ] return book (by: Sunday)
    3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+   ____________________________________________________________
+   delete 2
+   ____________________________________________________________
+   Noted. I've removed this task:
+     [D][ ] return book (by: Sunday)
+   Now you have 2 tasks in the list.
    ____________________________________________________________
    bye
    ____________________________________________________________
