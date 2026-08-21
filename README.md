@@ -1,6 +1,6 @@
-# Duke project template
+# MattChatBot
 
-This is a project template for a greenfield Java project. It's named after the Java mascot _Duke_. Given below are instructions on how to use it.
+MattChatBot is a greenfield Java chatbot project. Given below are instructions on how to set it up.
 
 ## Setting up in Intellij
 
@@ -13,13 +13,33 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    1. If there are any further prompts, accept the defaults.
 1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
    In the same dialog, set the **Project language level** field to the `SDK default` option.
-1. After that, locate the `src/main/java/Duke.java` file, right-click it, and choose `Run Duke.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, you should see something like the below as the output:
+1. After that, locate the `src/main/java/MattChatBot.java` file, right-click it, and choose `Run MattChatBot.main()` (if the code editor is showing compile errors, try restarting the IDE). If the setup is correct, you should see something like the below as the output:
    ```
-    ____        _        
-   |  _ \ _   _| | _____ 
-   | | | | | | | |/ / _ \
-   | |_| | |_| |   <  __/
-   |____/ \__,_|_|\_\___|
+   ____________________________________________________________
+   M   M   AAA   TTTTT  TTTTT
+   MM MM  A   A    T      T
+   M M M  AAAAA    T      T
+   M   M  A   A    T      T
+   M   M  A   A    T      T
+
+    CCC   H   H   AAA   TTTTT  BBBB    OOO   TTTTT
+   C   C  H   H  A   A    T    B   B  O   O    T
+   C      HHHHH  AAAAA    T    BBBB   O   O    T
+   C   C  H   H  A   A    T    B   B  O   O    T
+    CCC   H   H  A   A    T    BBBB    OOO     T
+
+   Hello! I'm MattChatBot.
+   What can I do for you?
+   ____________________________________________________________
+   Bye. Hope to see you again soon!
+   ____________________________________________________________
    ```
+
+## Running from the command line
+
+```
+javac -d bin src/main/java/MattChatBot.java
+java -cp bin MattChatBot
+```
 
 **Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
