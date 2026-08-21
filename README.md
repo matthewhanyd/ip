@@ -32,12 +32,16 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    What can I do for you?
    ____________________________________________________________
    ```
-   The bot then waits for your commands, echoing each one back, and exits
-   when you type `bye`:
+   The bot then waits for your commands. Any text you enter is remembered,
+   `list` shows everything so far, and `bye` exits:
    ```
-   list
+   read book
+   ____________________________________________________________
+   added: read book
    ____________________________________________________________
    list
+   ____________________________________________________________
+   1. read book
    ____________________________________________________________
    bye
    ____________________________________________________________
