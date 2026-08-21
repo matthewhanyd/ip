@@ -32,16 +32,23 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    What can I do for you?
    ____________________________________________________________
    ```
-   The bot then waits for your commands. Any text you enter is remembered,
-   `list` shows everything so far, and `bye` exits:
+   The bot then waits for your commands. Any text you enter is remembered as a
+   task; `list` shows them, `mark N` / `unmark N` change a task's status, and
+   `bye` exits:
    ```
    read book
    ____________________________________________________________
    added: read book
    ____________________________________________________________
+   mark 1
+   ____________________________________________________________
+   Nice! I've marked this task as done:
+     [X] read book
+   ____________________________________________________________
    list
    ____________________________________________________________
-   1. read book
+   Here are the tasks in your list:
+   1.[X] read book
    ____________________________________________________________
    bye
    ____________________________________________________________
@@ -52,7 +59,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
 ## Running from the command line
 
 ```
-javac -d bin src/main/java/MattChatBot.java
+javac -d bin src/main/java/*.java
 java -cp bin MattChatBot
 ```
 

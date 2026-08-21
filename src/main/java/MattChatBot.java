@@ -3,22 +3,15 @@ import java.util.Scanner;
 /**
  * Entry point of the MattChatBot chatbot.
  * <p>
- * At this stage (Level-2) the bot stores whatever text the user enters and
- * lists it back on request. Anything that is not a recognised command is
- * treated as a new item to store.
+ * At this stage (Level-3) the bot stores tasks, lists them with their
+ * done/not-done status, and lets the user mark and unmark them.
  */
 public class MattChatBot {
 
     /** Name the chatbot introduces itself with. */
     private static final String NAME = "MattChatBot";
 
-    /** Command that ends the conversation. */
-    private static final String COMMAND_BYE = "bye";
-
-    /** Command that lists everything stored so far. */
-    private static final String COMMAND_LIST = "list";
-
-    /** Maximum number of items that can be stored, as allowed by the requirements. */
+    /** Maximum number of tasks that can be stored, as allowed by the requirements. */
     private static final int MAX_TASKS = 100;
 
     /** Horizontal rule printed around each block of the bot's output. */
@@ -40,8 +33,8 @@ public class MattChatBot {
              CCC   H   H  A   A    T    BBBB    OOO     T
             """;
 
-    /** Items the user has stored, filled from index 0 upwards. */
-    private static final String[] tasks = new String[MAX_TASKS];
+    /** Tasks the user has stored, filled from index 0 upwards. */
+    private static final Task[] tasks = new Task[MAX_TASKS];
 
     /** How many entries of {@link #tasks} are actually in use. */
     private static int taskCount = 0;
@@ -54,7 +47,7 @@ public class MattChatBot {
 
     /**
      * Reads user input line by line and acts on it, stopping when the user
-     * enters {@link #COMMAND_BYE}.
+     * enters the bye command.
      * <p>
      * The loop also stops if the input stream ends (e.g. the user presses
      * Ctrl-D, or input is piped in from a file), so the bot exits cleanly
@@ -67,43 +60,94 @@ public class MattChatBot {
             if (input.isEmpty()) {
                 continue;
             }
-            if (input.equalsIgnoreCase(COMMAND_BYE)) {
+            // Split off the first word so that "mark 2" can be told apart from
+            // a task that merely happens to start with the word "mark".
+            String[] parts = input.split("\\s+", 2);
+            String command = parts[0].toLowerCase();
+            String argument = parts.length > 1 ? parts[1] : "";
+
+            switch (command) {
+            case "bye" -> {
                 return;
             }
-            if (input.equalsIgnoreCase(COMMAND_LIST)) {
-                listTasks();
-            } else {
-                addTask(input);
+            case "list" -> listTasks();
+            case "mark" -> setDone(argument, true);
+            case "unmark" -> setDone(argument, false);
+            default -> addTask(input);
             }
         }
     }
 
     /**
-     * Stores one item and confirms it to the user.
+     * Stores one task and confirms it to the user.
      *
-     * @param task the text to store
+     * @param description the text to store
      */
-    private static void addTask(String task) {
+    private static void addTask(String description) {
         if (taskCount == MAX_TASKS) {
             say("Sorry, I can only remember " + MAX_TASKS + " things at a time.");
             return;
         }
-        tasks[taskCount] = task;
+        tasks[taskCount] = new Task(description);
         taskCount++;
-        say("added: " + task);
+        say("added: " + description);
     }
 
-    /** Prints every stored item, numbered from 1. */
+    /** Prints every stored task, numbered from 1, with its status. */
     private static void listTasks() {
         if (taskCount == 0) {
             say("You haven't told me anything to remember yet.");
             return;
         }
-        String[] numbered = new String[taskCount];
+        String[] lines = new String[taskCount + 1];
+        lines[0] = "Here are the tasks in your list:";
         for (int i = 0; i < taskCount; i++) {
-            numbered[i] = (i + 1) + ". " + tasks[i];
+            lines[i + 1] = (i + 1) + "." + tasks[i];
         }
-        say(numbered);
+        say(lines);
+    }
+
+    /**
+     * Marks the task at the given position as done or not done.
+     *
+     * @param argument the task number as the user typed it, 1-based
+     * @param isDone   true to mark the task done, false to reverse it
+     */
+    private static void setDone(String argument, boolean isDone) {
+        int index = parseTaskNumber(argument);
+        if (index < 0) {
+            return;
+        }
+        Task task = tasks[index];
+        if (isDone) {
+            task.markAsDone();
+            say("Nice! I've marked this task as done:", "  " + task);
+        } else {
+            task.markAsNotDone();
+            say("OK, I've marked this task as not done yet:", "  " + task);
+        }
+    }
+
+    /**
+     * Converts what the user typed into a valid index into {@link #tasks},
+     * explaining the problem to the user if it is not usable.
+     *
+     * @param argument the task number as the user typed it, 1-based
+     * @return the matching 0-based index, or -1 if the input was not usable
+     */
+    private static int parseTaskNumber(String argument) {
+        int number;
+        try {
+            number = Integer.parseInt(argument.trim());
+        } catch (NumberFormatException e) {
+            say("Please give me a task number, e.g. mark 2");
+            return -1;
+        }
+        if (number < 1 || number > taskCount) {
+            say("You don't have a task " + number + ". Type list to see what you have.");
+            return -1;
+        }
+        return number - 1;
     }
 
     /** Prints the banner and the welcome message. */
