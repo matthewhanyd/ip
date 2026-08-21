@@ -31,6 +31,16 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    Hello! I'm MattChatBot.
    What can I do for you?
    ____________________________________________________________
+   ```
+   The bot then waits for your commands, echoing each one back, and exits
+   when you type `bye`:
+   ```
+   list
+   ____________________________________________________________
+   list
+   ____________________________________________________________
+   bye
+   ____________________________________________________________
    Bye. Hope to see you again soon!
    ____________________________________________________________
    ```
