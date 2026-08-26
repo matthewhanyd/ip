@@ -29,6 +29,11 @@ public class Event extends Task {
     }
 
     @Override
+    public String toFileFormat() {
+        return super.toFileFormat() + " | " + from + " | " + to;
+    }
+
+    @Override
     public String toString() {
         return super.toString() + " (from: " + from + " to: " + to + ")";
     }
