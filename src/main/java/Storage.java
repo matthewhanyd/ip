@@ -47,4 +47,53 @@ public class Storage {
                     "I couldn't save your tasks to " + FILE_PATH + ".");
         }
     }
+
+    /**
+     * Reads the saved task list back from disk.
+     * <p>
+     * A missing file is not an error: it simply means nothing has been saved
+     * yet, which is what a first run on another computer looks like.
+     *
+     * @return the saved tasks, or an empty list if there is nothing saved
+     * @throws MattChatBotException if the file exists but cannot be read
+     */
+    public static ArrayList<Task> load() throws MattChatBotException {
+        ArrayList<Task> tasks = new ArrayList<>();
+        if (!Files.exists(FILE_PATH)) {
+            return tasks;
+        }
+        try {
+            for (String line : Files.readAllLines(FILE_PATH)) {
+                if (!line.isBlank()) {
+                    tasks.add(parse(line));
+                }
+            }
+        } catch (IOException e) {
+            throw new MattChatBotException(
+                    "I couldn't read your saved tasks from " + FILE_PATH + ".");
+        }
+        return tasks;
+    }
+
+    /**
+     * Turns one line of the save file back into a task.
+     *
+     * @param line one line of the save file
+     * @return the task it describes
+     * @throws MattChatBotException if the line is not in the expected format
+     */
+    private static Task parse(String line) throws MattChatBotException {
+        String[] fields = line.split("\\s*\\|\\s*");
+        String type = fields[0];
+        Task task = switch (type) {
+        case "T" -> new Todo(fields[2]);
+        case "D" -> new Deadline(fields[2], fields[3]);
+        case "E" -> new Event(fields[2], fields[3], fields[4]);
+        default -> throw new MattChatBotException("Unknown task type: " + type);
+        };
+        if (fields[1].equals("1")) {
+            task.markAsDone();
+        }
+        return task;
+    }
 }

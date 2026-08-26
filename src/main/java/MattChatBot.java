@@ -48,12 +48,25 @@ public class MattChatBot {
      * grows as needed, so there is no 100-task ceiling, and it closes the gap
      * itself when a task is deleted.
      */
-    private static final ArrayList<Task> tasks = new ArrayList<>();
+    private static ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         greet();
+        loadSavedTasks();
         runCommandLoop();
         exit();
+    }
+
+    /**
+     * Loads any previously saved tasks, so a session continues where the last
+     * one left off.
+     */
+    private static void loadSavedTasks() {
+        try {
+            tasks = Storage.load();
+        } catch (MattChatBotException e) {
+            say(e.getMessage(), "Starting with an empty list instead.");
+        }
     }
 
     /**
