@@ -64,6 +64,13 @@ public class MattChatBot {
     private static void loadSavedTasks() {
         try {
             tasks = Storage.load();
+            int skipped = Storage.getSkippedLineCount();
+            if (skipped > 0) {
+                say("I couldn't understand " + skipped + (skipped == 1
+                        ? " line in your saved file, so I skipped it."
+                        : " lines in your saved file, so I skipped them."),
+                        "The tasks I could read are still here.");
+            }
         } catch (MattChatBotException e) {
             say(e.getMessage(), "Starting with an empty list instead.");
         }

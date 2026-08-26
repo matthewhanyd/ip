@@ -23,6 +23,9 @@ public class Storage {
     /** Separates the fields of one task within a line of the save file. */
     private static final String SEPARATOR = " | ";
 
+    /** How many damaged lines the most recent {@link #load()} had to skip. */
+    private static int skippedLineCount = 0;
+
     /**
      * Writes the whole task list to disk, replacing whatever was there before.
      * <p>
@@ -62,10 +65,18 @@ public class Storage {
         if (!Files.exists(FILE_PATH)) {
             return tasks;
         }
+        skippedLineCount = 0;
         try {
             for (String line : Files.readAllLines(FILE_PATH)) {
-                if (!line.isBlank()) {
+                if (line.isBlank()) {
+                    continue;
+                }
+                try {
                     tasks.add(parse(line));
+                } catch (MattChatBotException e) {
+                    // One damaged line should not cost the user every other
+                    // task, so skip it and carry on with the rest of the file.
+                    skippedLineCount++;
                 }
             }
         } catch (IOException e) {
@@ -84,7 +95,22 @@ public class Storage {
      */
     private static Task parse(String line) throws MattChatBotException {
         String[] fields = line.split("\\s*\\|\\s*");
-        String type = fields[0];
+        String type = fields.length > 0 ? fields[0] : "";
+        // Each type has a fixed field count, so a line with the wrong number
+        // of fields is damaged and is rejected before any field is read.
+        int expectedFields = switch (type) {
+        case "T" -> 3;
+        case "D" -> 4;
+        case "E" -> 5;
+        default -> throw new MattChatBotException("Unknown task type: " + type);
+        };
+        if (fields.length != expectedFields) {
+            throw new MattChatBotException("Expected " + expectedFields
+                    + " fields but found " + fields.length);
+        }
+        if (fields[2].isBlank()) {
+            throw new MattChatBotException("Task has no description");
+        }
         Task task = switch (type) {
         case "T" -> new Todo(fields[2]);
         case "D" -> new Deadline(fields[2], fields[3]);
@@ -93,7 +119,19 @@ public class Storage {
         };
         if (fields[1].equals("1")) {
             task.markAsDone();
+        } else if (!fields[1].equals("0")) {
+            throw new MattChatBotException("Status must be 0 or 1");
         }
         return task;
+    }
+
+    /**
+     * Returns how many damaged lines the most recent {@link #load()} skipped,
+     * so the chatbot can tell the user that some saved tasks were lost.
+     *
+     * @return the number of lines skipped, zero if the file was intact
+     */
+    public static int getSkippedLineCount() {
+        return skippedLineCount;
     }
 }
