@@ -54,6 +54,18 @@ public abstract class Task {
     }
 
     /**
+     * Returns the task encoded for the save file, e.g. {@code T | 1 | read book}.
+     * <p>
+     * Subclasses append their own fields, so the encoding of each task type
+     * lives with that type rather than in one big switch inside Storage.
+     *
+     * @return the line to write to the save file
+     */
+    public String toFileFormat() {
+        return getTypeIcon() + " | " + (isDone ? "1" : "0") + " | " + description;
+    }
+
+    /**
      * Returns the task as the user sees it, e.g. {@code [T][X] read book}.
      * Subclasses that carry dates append them to this.
      */

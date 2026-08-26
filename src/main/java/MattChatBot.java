@@ -48,12 +48,32 @@ public class MattChatBot {
      * grows as needed, so there is no 100-task ceiling, and it closes the gap
      * itself when a task is deleted.
      */
-    private static final ArrayList<Task> tasks = new ArrayList<>();
+    private static ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         greet();
+        loadSavedTasks();
         runCommandLoop();
         exit();
+    }
+
+    /**
+     * Loads any previously saved tasks, so a session continues where the last
+     * one left off.
+     */
+    private static void loadSavedTasks() {
+        try {
+            tasks = Storage.load();
+            int skipped = Storage.getSkippedLineCount();
+            if (skipped > 0) {
+                say("I couldn't understand " + skipped + (skipped == 1
+                        ? " line in your saved file, so I skipped it."
+                        : " lines in your saved file, so I skipped them."),
+                        "The tasks I could read are still here.");
+            }
+        } catch (MattChatBotException e) {
+            say(e.getMessage(), "Starting with an empty list instead.");
+        }
     }
 
     /**
@@ -227,9 +247,11 @@ public class MattChatBot {
      * Stores one task and confirms it to the user.
      *
      * @param task the task to store
+     * @throws MattChatBotException if the updated list cannot be saved
      */
-    private static void addTask(Task task) {
+    private static void addTask(Task task) throws MattChatBotException {
         tasks.add(task);
+        Storage.save(tasks);
         say("Got it. I've added this task:", "  " + task, countSummary());
     }
 
@@ -243,6 +265,7 @@ public class MattChatBot {
     private static void deleteTask(String argument) throws MattChatBotException {
         int index = parseTaskNumber(argument, Command.DELETE);
         Task removed = tasks.remove(index);
+        Storage.save(tasks);
         say("Noted. I've removed this task:", "  " + removed, countSummary());
     }
 
@@ -276,9 +299,13 @@ public class MattChatBot {
         Task task = tasks.get(index);
         if (isDone) {
             task.markAsDone();
-            say("Nice! I've marked this task as done:", "  " + task);
         } else {
             task.markAsNotDone();
+        }
+        Storage.save(tasks);
+        if (isDone) {
+            say("Nice! I've marked this task as done:", "  " + task);
+        } else {
             say("OK, I've marked this task as not done yet:", "  " + task);
         }
     }

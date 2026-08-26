@@ -87,6 +87,10 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ____________________________________________________________
    ```
 
+Your tasks are saved automatically to `data/mattchatbot.txt` whenever the list
+changes, and loaded again the next time you start the bot. The file is created
+on first use, so there is nothing to set up.
+
 ## Running from the command line
 
 ```
