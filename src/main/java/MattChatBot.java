@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -131,6 +133,10 @@ public class MattChatBot {
         case BYE -> true;
         case LIST -> {
             listTasks();
+            yield false;
+        }
+        case ON -> {
+            listTasksOn(argument);
             yield false;
         }
         case MARK -> {
@@ -284,6 +290,33 @@ public class MattChatBot {
             lines[i + 1] = (i + 1) + "." + tasks.get(i);
         }
         say(lines);
+    }
+
+    /**
+     * Prints the tasks that fall on a given date.
+     *
+     * @param argument the date as the user typed it
+     * @throws MattChatBotException if the date is missing or not understood
+     */
+    private static void listTasksOn(String argument) throws MattChatBotException {
+        if (argument.isEmpty()) {
+            throw new MattChatBotException("Which date? Try: "
+                    + Command.ON.getKeyword() + " 2019-10-15");
+        }
+        LocalDate date = DateTimes.parseDate(argument);
+        ArrayList<String> lines = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.occursOn(date)) {
+                lines.add((lines.size() + 1) + "." + task);
+            }
+        }
+        String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
+        if (lines.isEmpty()) {
+            say("Nothing on " + shownDate + ".");
+            return;
+        }
+        lines.add(0, "Here is what you have on " + shownDate + ":");
+        say(lines.toArray(new String[0]));
     }
 
     /**
