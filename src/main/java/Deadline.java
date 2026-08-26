@@ -1,22 +1,22 @@
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 /**
  * A task that must be done before a given point in time,
- * e.g. {@code submit report (by: Sunday)}.
+ * e.g. {@code return book (by: Oct 15 2019)}.
  */
 public class Deadline extends Task {
 
-    /**
-     * When the task is due. Kept as free text, since this increment does not
-     * require parsing real dates.
-     */
-    protected String by;
+    /** When the task is due. */
+    protected LocalDateTime by;
 
     /**
      * Creates a deadline.
      *
      * @param description what the user needs to do
-     * @param by          when it is due, as the user typed it
+     * @param by          when it is due
      */
-    public Deadline(String description, String by) {
+    public Deadline(String description, LocalDateTime by) {
         super(description);
         this.by = by;
     }
@@ -27,12 +27,17 @@ public class Deadline extends Task {
     }
 
     @Override
+    public boolean occursOn(LocalDate date) {
+        return by.toLocalDate().equals(date);
+    }
+
+    @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + by;
+        return super.toFileFormat() + " | " + DateTimes.toFileString(by);
     }
 
     @Override
     public String toString() {
-        return super.toString() + " (by: " + by + ")";
+        return super.toString() + " (by: " + DateTimes.format(by) + ")";
     }
 }

@@ -33,8 +33,10 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ____________________________________________________________
    ```
    The bot then waits for your commands. It tracks three kinds of task --
-   `todo`, `deadline` and `event`. `mark N` / `unmark N` change a task's
-   status, `delete N` removes one, `list` shows everything, and `bye` exits:
+   `todo`, `deadline` and `event`. Dates are written as `yyyy-MM-dd`, with an
+   optional `HHmm` time. `mark N` / `unmark N` change a task's status,
+   `delete N` removes one, `list` shows everything, `on <date>` shows what
+   falls on one day, and `bye` exits:
    ```
    todo read book
    ____________________________________________________________
@@ -42,17 +44,23 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
      [T][ ] read book
    Now you have 1 task in the list.
    ____________________________________________________________
-   deadline return book /by Sunday
+   deadline return book /by 2019-10-15
    ____________________________________________________________
    Got it. I've added this task:
-     [D][ ] return book (by: Sunday)
+     [D][ ] return book (by: Oct 15 2019)
    Now you have 2 tasks in the list.
    ____________________________________________________________
-   event project meeting /from Mon 2pm /to 4pm
+   event project meeting /from 2019-10-15 1400 /to 2019-10-15 1600
    ____________________________________________________________
    Got it. I've added this task:
-     [E][ ] project meeting (from: Mon 2pm to: 4pm)
+     [E][ ] project meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)
    Now you have 3 tasks in the list.
+   ____________________________________________________________
+   on 2019-10-15
+   ____________________________________________________________
+   Here is what you have on Oct 15 2019:
+   1.[D][ ] return book (by: Oct 15 2019)
+   2.[E][ ] project meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)
    ____________________________________________________________
    mark 1
    ____________________________________________________________
@@ -63,13 +71,13 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    ____________________________________________________________
    Here are the tasks in your list:
    1.[T][X] read book
-   2.[D][ ] return book (by: Sunday)
-   3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+   2.[D][ ] return book (by: Oct 15 2019)
+   3.[E][ ] project meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)
    ____________________________________________________________
    delete 2
    ____________________________________________________________
    Noted. I've removed this task:
-     [D][ ] return book (by: Sunday)
+     [D][ ] return book (by: Oct 15 2019)
    Now you have 2 tasks in the list.
    ____________________________________________________________
    bye
@@ -81,9 +89,9 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    If a command is not understood, or is missing a part it needs, the bot says
    what was wrong and how to write it instead:
    ```
-   deadline /by Sunday
+   deadline /by 2019-10-15
    ____________________________________________________________
-   A deadline needs a description before the /by. Try: deadline return book /by Sunday
+   A deadline needs a description before the /by. Try: deadline return book /by 2019-10-15
    ____________________________________________________________
    ```
 

@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * A single item in the user's list, together with whether it has been done.
  * <p>
@@ -51,6 +53,20 @@ public abstract class Task {
     /** Marks this task as not done yet. */
     public void markAsNotDone() {
         this.isDone = false;
+    }
+
+    /**
+     * Returns whether this task happens on the given date.
+     * <p>
+     * Todos have no date, so the default is false; the task types that do
+     * carry dates override this. Asking the task itself avoids having to test
+     * its type with instanceof from outside.
+     *
+     * @param date the date being asked about
+     * @return true if this task falls on that date
+     */
+    public boolean occursOn(LocalDate date) {
+        return false;
     }
 
     /**
