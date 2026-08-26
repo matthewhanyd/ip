@@ -184,7 +184,7 @@ public class MattChatBot {
      */
     private static void addDeadline(String argument) throws MattChatBotException {
         String example = "Try: " + Command.DEADLINE.getKeyword()
-                + " return book /by Sunday";
+                + " return book /by 2019-10-15";
         int byAt = argument.indexOf(KEYWORD_BY);
         if (byAt < 0) {
             throw new MattChatBotException(
@@ -200,7 +200,7 @@ public class MattChatBot {
             throw new MattChatBotException(
                     "A deadline needs a date or time after the /by. " + example);
         }
-        addTask(new Deadline(description, by));
+        addTask(new Deadline(description, DateTimes.parse(by)));
     }
 
     /**
@@ -212,7 +212,7 @@ public class MattChatBot {
      */
     private static void addEvent(String argument) throws MattChatBotException {
         String example = "Try: " + Command.EVENT.getKeyword()
-                + " project meeting /from Mon 2pm /to 4pm";
+                + " project meeting /from 2019-10-15 1400 /to 2019-10-15 1600";
         int fromAt = argument.indexOf(KEYWORD_FROM);
         if (fromAt < 0) {
             throw new MattChatBotException(
@@ -240,7 +240,8 @@ public class MattChatBot {
             throw new MattChatBotException(
                     "An event needs an end time after the /to. " + example);
         }
-        addTask(new Event(description, from, to));
+        addTask(new Event(description, DateTimes.parse(from),
+                DateTimes.parse(to)));
     }
 
     /**

@@ -113,8 +113,9 @@ public class Storage {
         }
         Task task = switch (type) {
         case "T" -> new Todo(fields[2]);
-        case "D" -> new Deadline(fields[2], fields[3]);
-        case "E" -> new Event(fields[2], fields[3], fields[4]);
+        case "D" -> new Deadline(fields[2], DateTimes.parse(fields[3]));
+        case "E" -> new Event(fields[2], DateTimes.parse(fields[3]),
+                DateTimes.parse(fields[4]));
         default -> throw new MattChatBotException("Unknown task type: " + type);
         };
         if (fields[1].equals("1")) {
