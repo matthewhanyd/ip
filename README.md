@@ -99,6 +99,16 @@ Your tasks are saved automatically to `data/mattchatbot.txt` whenever the list
 changes, and loaded again the next time you start the bot. The file is created
 on first use, so there is nothing to set up.
 
+## Building and running with Gradle
+
+```
+./gradlew run
+```
+
+`./gradlew build` compiles the code and runs the tests. Gradle downloads the
+right Gradle version itself the first time, so nothing needs installing
+beyond a JDK 25.
+
 ## Running from the command line
 
 ```
