@@ -58,6 +58,15 @@ public abstract class Task {
     }
 
     /**
+     * Returns what the user asked to be reminded of.
+     *
+     * @return the task's description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
      * Returns whether this task happens on the given date.
      * <p>
      * Todos have no date, so the default is false; the task types that do

@@ -26,6 +26,9 @@ public enum Command {
     /** Shows the tasks falling on a given date. */
     ON("on"),
 
+    /** Shows the tasks whose description contains a given keyword. */
+    FIND("find"),
+
     /** Marks a task as done. */
     MARK("mark"),
 
