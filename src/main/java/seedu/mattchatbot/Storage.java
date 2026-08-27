@@ -1,8 +1,15 @@
+package seedu.mattchatbot;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import seedu.mattchatbot.task.Deadline;
+import seedu.mattchatbot.task.Event;
+import seedu.mattchatbot.task.Task;
+import seedu.mattchatbot.task.TaskList;
+import seedu.mattchatbot.task.Todo;
 
 /**
  * Reads the task list from disk when the chatbot starts, and writes it back

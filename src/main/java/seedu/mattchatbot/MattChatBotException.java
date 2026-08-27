@@ -1,3 +1,5 @@
+package seedu.mattchatbot;
+
 /**
  * Signals that the user asked for something the bot cannot do, e.g. a command
  * it does not recognise, or a command missing a part it needs.
