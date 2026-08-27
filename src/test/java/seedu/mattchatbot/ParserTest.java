@@ -35,7 +35,7 @@ public class ParserTest {
         MattChatBotException e = assertThrows(MattChatBotException.class,
                 () -> Parser.parseCommand("blah blah"));
         assertEquals("I don't know what \"blah\" means. I understand: "
-                + "todo, deadline, event, list, on, mark, unmark, delete, bye",
+                + "todo, deadline, event, list, on, find, mark, unmark, delete, bye",
                 e.getMessage());
     }
 
@@ -130,6 +130,19 @@ public class ParserTest {
         MattChatBotException e = assertThrows(MattChatBotException.class,
                 () -> Parser.parseTaskNumber("abc", Command.UNMARK));
         assertEquals("\"abc\" is not a task number. Try: unmark 2", e.getMessage());
+    }
+
+    @Test
+    public void parseKeyword_hasKeyword_keywordReturned() throws Exception {
+        assertEquals("book", Parser.parseKeyword("book"));
+        assertEquals("read book", Parser.parseKeyword("read book"));
+    }
+
+    @Test
+    public void parseKeyword_missingKeyword_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class,
+                () -> Parser.parseKeyword(""));
+        assertEquals("What should I look for? Try: find book", e.getMessage());
     }
 
     @Test

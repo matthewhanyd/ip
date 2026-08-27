@@ -170,6 +170,21 @@ public class Parser {
     }
 
     /**
+     * Reads the keyword given to the find command.
+     *
+     * @param argument the keyword as the user typed it
+     * @return the keyword
+     * @throws MattChatBotException if no keyword was given
+     */
+    public static String parseKeyword(String argument) throws MattChatBotException {
+        if (argument.isEmpty()) {
+            throw new MattChatBotException("What should I look for? Try: "
+                    + Command.FIND.getKeyword() + " book");
+        }
+        return argument;
+    }
+
+    /**
      * Reads the date given to the on command.
      *
      * @param argument the date as the user typed it

@@ -81,6 +81,24 @@ public class TaskList {
     }
 
     /**
+     * Returns the tasks whose description contains the given keyword,
+     * ignoring case.
+     *
+     * @param keyword the text to look for
+     * @return the matching tasks, in list order
+     */
+    public ArrayList<Task> matching(String keyword) {
+        ArrayList<Task> matches = new ArrayList<>();
+        String wanted = keyword.toLowerCase();
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase().contains(wanted)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
      * Returns every task, for saving or displaying.
      *
      * @return the tasks, in list order

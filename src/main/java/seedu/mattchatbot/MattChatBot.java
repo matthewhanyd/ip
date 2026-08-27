@@ -116,6 +116,10 @@ public class MattChatBot {
             listTasksOn(Parser.parseOnDate(argument));
             yield false;
         }
+        case FIND -> {
+            listMatchingTasks(Parser.parseKeyword(argument));
+            yield false;
+        }
         case MARK -> {
             setDone(Parser.parseTaskNumber(argument, Command.MARK), true);
             yield false;
@@ -213,6 +217,20 @@ public class MattChatBot {
             return;
         }
         ui.show(numbered("Here is what you have on " + shownDate + ":", matches));
+    }
+
+    /**
+     * Prints the tasks whose description contains the given keyword.
+     *
+     * @param keyword the text the user is looking for
+     */
+    private void listMatchingTasks(String keyword) {
+        ArrayList<Task> matches = tasks.matching(keyword);
+        if (matches.isEmpty()) {
+            ui.show("No tasks match \"" + keyword + "\".");
+            return;
+        }
+        ui.show(numbered("Here are the matching tasks in your list:", matches));
     }
 
     /**

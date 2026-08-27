@@ -123,6 +123,38 @@ public class TaskListTest {
     }
 
     @Test
+    public void matching_keywordInDescription_taskMatched() {
+        ArrayList<Task> found = listOfThree().matching("book");
+        assertEquals(2, found.size());
+        assertEquals("[T][ ] read book", found.get(0).toString());
+        assertEquals("[D][ ] return book (by: Oct 15 2019)", found.get(1).toString());
+    }
+
+    @Test
+    public void matching_differentCase_stillMatched() {
+        assertEquals(2, listOfThree().matching("BOOK").size());
+        assertEquals(2, listOfThree().matching("BoOk").size());
+    }
+
+    @Test
+    public void matching_partialWord_matched() {
+        // The keyword is looked for anywhere in the description, not only as a
+        // whole word, so a prefix matches too.
+        assertEquals(1, listOfThree().matching("orient").size());
+    }
+
+    @Test
+    public void matching_keywordNotPresent_nothingMatched() {
+        assertTrue(listOfThree().matching("bicycle").isEmpty());
+    }
+
+    @Test
+    public void matching_dateTextNotSearched_nothingMatched() {
+        // Only the description is searched, not the formatted dates.
+        assertTrue(listOfThree().matching("Oct").isEmpty());
+    }
+
+    @Test
     public void describeSize_variousCounts_correctPlural() {
         TaskList tasks = new TaskList();
         assertEquals("0 tasks", tasks.describeSize());

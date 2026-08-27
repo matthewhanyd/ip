@@ -36,7 +36,7 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    `todo`, `deadline` and `event`. Dates are written as `yyyy-MM-dd`, with an
    optional `HHmm` time. `mark N` / `unmark N` change a task's status,
    `delete N` removes one, `list` shows everything, `on <date>` shows what
-   falls on one day, and `bye` exits:
+   falls on one day, `find <keyword>` searches descriptions, and `bye` exits:
    ```
    todo read book
    ____________________________________________________________
@@ -83,6 +83,11 @@ Prerequisites: JDK 25, update Intellij to the most recent version.
    bye
    ____________________________________________________________
    Bye. Hope to see you again soon!
+   ____________________________________________________________
+   find book
+   ____________________________________________________________
+   Here are the matching tasks in your list:
+   1.[D][ ] return book (by: Oct 15 2019)
    ____________________________________________________________
    ```
 
