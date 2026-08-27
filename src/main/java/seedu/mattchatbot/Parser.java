@@ -1,4 +1,9 @@
+package seedu.mattchatbot;
+
 import java.time.LocalDate;
+import seedu.mattchatbot.task.Deadline;
+import seedu.mattchatbot.task.Event;
+import seedu.mattchatbot.task.Todo;
 
 /**
  * Turns the raw text the user types into things the rest of the code can act

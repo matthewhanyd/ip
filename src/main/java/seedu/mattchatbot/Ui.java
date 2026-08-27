@@ -1,3 +1,5 @@
+package seedu.mattchatbot;
+
 import java.util.Scanner;
 
 /**

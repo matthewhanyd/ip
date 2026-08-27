@@ -1,3 +1,5 @@
+package seedu.mattchatbot;
+
 /**
  * The commands the chatbot understands, each paired with the keyword the user
  * types to invoke it.

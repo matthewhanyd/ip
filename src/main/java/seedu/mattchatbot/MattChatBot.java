@@ -1,6 +1,10 @@
+package seedu.mattchatbot;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import seedu.mattchatbot.task.Task;
+import seedu.mattchatbot.task.TaskList;
 
 /**
  * Entry point of the MattChatBot chatbot.
