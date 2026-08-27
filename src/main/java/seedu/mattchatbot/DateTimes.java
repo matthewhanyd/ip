@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 /**
  * Reads dates and times the user types, and formats them for display and for
@@ -16,13 +17,21 @@ import java.time.format.DateTimeParseException;
  */
 public class DateTimes {
 
-    /** Date on its own, as typed by the user, e.g. {@code 2019-10-15}. */
+    /**
+     * Date on its own, as typed by the user, e.g. {@code 2019-10-15}.
+     * <p>
+     * Resolved strictly, so that an impossible date such as 2019-02-30 is
+     * rejected rather than quietly moved to the last day of the month, which
+     * is what the default resolver does. Strict resolving needs the proleptic
+     * year "uuuu" rather than the year-of-era "yyyy", which would require an
+     * era to be given as well.
+     */
     private static final DateTimeFormatter INPUT_DATE =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter.ofPattern("uuuu-MM-dd").withResolverStyle(ResolverStyle.STRICT);
 
     /** Date with a time, as typed by the user, e.g. {@code 2019-10-15 1800}. */
     private static final DateTimeFormatter INPUT_DATE_TIME =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm").withResolverStyle(ResolverStyle.STRICT);
 
     /** Date as shown back to the user, e.g. {@code Oct 15 2019}. */
     private static final DateTimeFormatter DISPLAY_DATE =

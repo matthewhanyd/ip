@@ -34,15 +34,15 @@ public class Storage {
     /**
      * Creates a Storage reading and writing the given file.
      * <p>
-     * The path is split into its name parts with
-     * {@link Paths#get(String, String...)}, so that Java inserts the separator
-     * the current operating system expects rather than assuming a "/". Keep it
-     * relative, so the chatbot works wherever the project folder is copied to.
+     * Converted with {@link Paths#get(String, String...)}, which accepts "/"
+     * as a separator on every platform and applies the one the current
+     * operating system uses. Keep the path relative, so the chatbot works
+     * wherever the project folder is copied to.
      *
      * @param filePath the save file's path, e.g. {@code data/mattchatbot.txt}
      */
     public Storage(String filePath) {
-        this.filePath = Paths.get("", filePath.split("/"));
+        this.filePath = Paths.get(filePath);
     }
 
     /**
