@@ -1,7 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  * Entry point of the MattChatBot chatbot.
@@ -12,9 +11,6 @@ import java.util.Scanner;
  */
 public class MattChatBot {
 
-    /** Name the chatbot introduces itself with. */
-    private static final String NAME = "MattChatBot";
-
     /** Keyword separating a deadline's description from its due date. */
     private static final String KEYWORD_BY = "/by";
 
@@ -23,25 +19,6 @@ public class MattChatBot {
 
     /** Keyword separating an event's start time from its end time. */
     private static final String KEYWORD_TO = "/to";
-
-    /** Horizontal rule printed around each block of the bot's output. */
-    private static final String DIVIDER =
-            "____________________________________________________________";
-
-    /** ASCII-art banner shown once when the program starts. */
-    private static final String BANNER = """
-            M   M   AAA   TTTTT  TTTTT
-            MM MM  A   A    T      T
-            M M M  AAAAA    T      T
-            M   M  A   A    T      T
-            M   M  A   A    T      T
-
-             CCC   H   H   AAA   TTTTT  BBBB    OOO   TTTTT
-            C   C  H   H  A   A    T    B   B  O   O    T
-            C      HHHHH  AAAAA    T    BBBB   O   O    T
-            C   C  H   H  A   A    T    B   B  O   O    T
-             CCC   H   H  A   A    T    BBBB    OOO     T
-            """;
 
     /**
      * Tasks the user has stored, in the order they were added.
@@ -52,11 +29,14 @@ public class MattChatBot {
      */
     private static ArrayList<Task> tasks = new ArrayList<>();
 
+    /** Everything the user sees and types goes through here. */
+    private static final Ui ui = new Ui();
+
     public static void main(String[] args) {
-        greet();
+        ui.showWelcome();
         loadSavedTasks();
         runCommandLoop();
-        exit();
+        ui.showGoodbye();
     }
 
     /**
@@ -68,13 +48,13 @@ public class MattChatBot {
             tasks = Storage.load();
             int skipped = Storage.getSkippedLineCount();
             if (skipped > 0) {
-                say("I couldn't understand " + skipped + (skipped == 1
+                ui.show("I couldn't understand " + skipped + (skipped == 1
                         ? " line in your saved file, so I skipped it."
                         : " lines in your saved file, so I skipped them."),
                         "The tasks I could read are still here.");
             }
         } catch (MattChatBotException e) {
-            say(e.getMessage(), "Starting with an empty list instead.");
+            ui.showLoadingError(e.getMessage());
         }
     }
 
@@ -92,9 +72,8 @@ public class MattChatBot {
      * instead of crashing when there is no more input to read.
      */
     private static void runCommandLoop() {
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNextLine()) {
-            String input = scanner.nextLine().trim();
+        while (ui.hasNextCommand()) {
+            String input = ui.readCommand();
             if (input.isEmpty()) {
                 continue;
             }
@@ -104,7 +83,7 @@ public class MattChatBot {
                     return;
                 }
             } catch (MattChatBotException e) {
-                say(e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
     }
@@ -259,7 +238,7 @@ public class MattChatBot {
     private static void addTask(Task task) throws MattChatBotException {
         tasks.add(task);
         Storage.save(tasks);
-        say("Got it. I've added this task:", "  " + task, countSummary());
+        ui.show("Got it. I've added this task:", "  " + task, countSummary());
     }
 
     /**
@@ -273,13 +252,13 @@ public class MattChatBot {
         int index = parseTaskNumber(argument, Command.DELETE);
         Task removed = tasks.remove(index);
         Storage.save(tasks);
-        say("Noted. I've removed this task:", "  " + removed, countSummary());
+        ui.show("Noted. I've removed this task:", "  " + removed, countSummary());
     }
 
     /** Prints every stored task, numbered from 1, with its type and status. */
     private static void listTasks() {
         if (tasks.isEmpty()) {
-            say("Your list is empty. Add something with "
+            ui.show("Your list is empty. Add something with "
                     + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
                     + " or " + Command.EVENT.getKeyword() + ".");
             return;
@@ -289,7 +268,7 @@ public class MattChatBot {
         for (int i = 0; i < tasks.size(); i++) {
             lines[i + 1] = (i + 1) + "." + tasks.get(i);
         }
-        say(lines);
+        ui.show(lines);
     }
 
     /**
@@ -312,11 +291,11 @@ public class MattChatBot {
         }
         String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
         if (lines.isEmpty()) {
-            say("Nothing on " + shownDate + ".");
+            ui.show("Nothing on " + shownDate + ".");
             return;
         }
         lines.add(0, "Here is what you have on " + shownDate + ":");
-        say(lines.toArray(new String[0]));
+        ui.show(lines.toArray(new String[0]));
     }
 
     /**
@@ -338,9 +317,9 @@ public class MattChatBot {
         }
         Storage.save(tasks);
         if (isDone) {
-            say("Nice! I've marked this task as done:", "  " + task);
+            ui.show("Nice! I've marked this task as done:", "  " + task);
         } else {
-            say("OK, I've marked this task as not done yet:", "  " + task);
+            ui.show("OK, I've marked this task as not done yet:", "  " + task);
         }
     }
 
@@ -395,27 +374,4 @@ public class MattChatBot {
         return tasks.size() + (tasks.size() == 1 ? " task" : " tasks");
     }
 
-    /** Prints the banner and the welcome message. */
-    private static void greet() {
-        say(BANNER, "Hello! I'm " + NAME + ".", "What can I do for you?");
-    }
-
-    /** Prints the farewell message. */
-    private static void exit() {
-        say("Bye. Hope to see you again soon!");
-    }
-
-    /**
-     * Prints the given lines as one block, wrapped in horizontal dividers, so
-     * that every reply the bot makes is formatted consistently.
-     *
-     * @param lines the lines to print between the dividers
-     */
-    private static void say(String... lines) {
-        System.out.println(DIVIDER);
-        for (String line : lines) {
-            System.out.println(line);
-        }
-        System.out.println(DIVIDER);
-    }
 }
