@@ -94,32 +94,32 @@ public class TaskListTest {
     }
 
     @Test
-    public void occurringOn_deadlineOnThatDate_deadlineMatched() {
-        ArrayList<Task> found = listOfThree().occurringOn(LocalDate.of(2019, 10, 15));
+    public void getTasksOn_deadlineOnThatDate_deadlineMatched() {
+        ArrayList<Task> found = listOfThree().getTasksOn(LocalDate.of(2019, 10, 15));
         // The deadline falls on the date, and the event spans it.
         assertEquals(2, found.size());
         assertEquals("[D][ ] return book (by: Oct 15 2019)", found.get(0).toString());
     }
 
     @Test
-    public void occurringOn_dateInsideEventRange_eventMatched() {
-        ArrayList<Task> found = listOfThree().occurringOn(LocalDate.of(2019, 10, 17));
+    public void getTasksOn_dateInsideEventRange_eventMatched() {
+        ArrayList<Task> found = listOfThree().getTasksOn(LocalDate.of(2019, 10, 17));
         assertEquals(1, found.size());
         assertEquals("[E][ ] orientation (from: Oct 14 2019 to: Oct 18 2019)",
                 found.get(0).toString());
     }
 
     @Test
-    public void occurringOn_eventBoundaryDates_bothEndsIncluded() {
-        assertEquals(1, listOfThree().occurringOn(LocalDate.of(2019, 10, 14)).size());
-        assertEquals(1, listOfThree().occurringOn(LocalDate.of(2019, 10, 18)).size());
+    public void getTasksOn_eventBoundaryDates_bothEndsIncluded() {
+        assertEquals(1, listOfThree().getTasksOn(LocalDate.of(2019, 10, 14)).size());
+        assertEquals(1, listOfThree().getTasksOn(LocalDate.of(2019, 10, 18)).size());
     }
 
     @Test
-    public void occurringOn_dateOutsideEverything_nothingMatched() {
-        assertTrue(listOfThree().occurringOn(LocalDate.of(2020, 1, 1)).isEmpty());
+    public void getTasksOn_dateOutsideEverything_nothingMatched() {
+        assertTrue(listOfThree().getTasksOn(LocalDate.of(2020, 1, 1)).isEmpty());
         // A todo has no date, so it never matches.
-        assertTrue(new TaskList(new ArrayList<>()).occurringOn(LocalDate.now()).isEmpty());
+        assertTrue(new TaskList(new ArrayList<>()).getTasksOn(LocalDate.now()).isEmpty());
     }
 
     @Test
