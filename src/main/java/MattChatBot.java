@@ -27,7 +27,7 @@ public class MattChatBot {
      * grows as needed, so there is no 100-task ceiling, and it closes the gap
      * itself when a task is deleted.
      */
-    private static ArrayList<Task> tasks = new ArrayList<>();
+    private static TaskList tasks = new TaskList();
 
     /** Everything the user sees and types goes through here. */
     private static final Ui ui = new Ui();
@@ -45,7 +45,7 @@ public class MattChatBot {
      */
     private static void loadSavedTasks() {
         try {
-            tasks = Storage.load();
+            tasks = new TaskList(Storage.load());
             int skipped = Storage.getSkippedLineCount();
             if (skipped > 0) {
                 ui.show("I couldn't understand " + skipped + (skipped == 1
@@ -237,7 +237,7 @@ public class MattChatBot {
      */
     private static void addTask(Task task) throws MattChatBotException {
         tasks.add(task);
-        Storage.save(tasks);
+        Storage.save(tasks.asList());
         ui.show("Got it. I've added this task:", "  " + task, countSummary());
     }
 
@@ -251,7 +251,7 @@ public class MattChatBot {
     private static void deleteTask(String argument) throws MattChatBotException {
         int index = parseTaskNumber(argument, Command.DELETE);
         Task removed = tasks.remove(index);
-        Storage.save(tasks);
+        Storage.save(tasks.asList());
         ui.show("Noted. I've removed this task:", "  " + removed, countSummary());
     }
 
@@ -263,10 +263,11 @@ public class MattChatBot {
                     + " or " + Command.EVENT.getKeyword() + ".");
             return;
         }
-        String[] lines = new String[tasks.size() + 1];
+        ArrayList<Task> all = tasks.asList();
+        String[] lines = new String[all.size() + 1];
         lines[0] = "Here are the tasks in your list:";
-        for (int i = 0; i < tasks.size(); i++) {
-            lines[i + 1] = (i + 1) + "." + tasks.get(i);
+        for (int i = 0; i < all.size(); i++) {
+            lines[i + 1] = (i + 1) + "." + all.get(i);
         }
         ui.show(lines);
     }
@@ -284,10 +285,8 @@ public class MattChatBot {
         }
         LocalDate date = DateTimes.parseDate(argument);
         ArrayList<String> lines = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.occursOn(date)) {
-                lines.add((lines.size() + 1) + "." + task);
-            }
+        for (Task task : tasks.occurringOn(date)) {
+            lines.add((lines.size() + 1) + "." + task);
         }
         String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
         if (lines.isEmpty()) {
@@ -315,7 +314,7 @@ public class MattChatBot {
         } else {
             task.markAsNotDone();
         }
-        Storage.save(tasks);
+        Storage.save(tasks.asList());
         if (isDone) {
             ui.show("Nice! I've marked this task as done:", "  " + task);
         } else {
@@ -346,15 +345,6 @@ public class MattChatBot {
             throw new MattChatBotException("\"" + argument
                     + "\" is not a task number. Try: " + keyword + " 2");
         }
-        if (tasks.isEmpty()) {
-            throw new MattChatBotException(
-                    "Your list is empty, so there is no task " + number + " yet.");
-        }
-        if (number < 1 || number > tasks.size()) {
-            throw new MattChatBotException("You have " + describeCount()
-                    + ", so there is no task " + number + ". Type "
-                    + Command.LIST.getKeyword() + " to see them.");
-        }
         return number - 1;
     }
 
@@ -371,7 +361,7 @@ public class MattChatBot {
      * {@code 1 task} or {@code 4 tasks}.
      */
     private static String describeCount() {
-        return tasks.size() + (tasks.size() == 1 ? " task" : " tasks");
+        return tasks.describeSize();
     }
 
 }
