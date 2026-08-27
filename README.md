@@ -109,6 +109,21 @@ on first use, so there is nothing to set up.
 right Gradle version itself the first time, so nothing needs installing
 beyond a JDK 25.
 
+## Packaging as a JAR
+
+```
+./gradlew shadowJar
+```
+
+This produces `build/libs/mattchatbot.jar`, which bundles its dependencies.
+Copy it into a folder of its own and run it with:
+
+```
+java -jar "mattchatbot.jar"
+```
+
+It creates its `data` folder alongside the JAR on first use.
+
 ## Running from the command line
 
 ```
