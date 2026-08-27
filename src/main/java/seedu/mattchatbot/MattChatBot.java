@@ -65,6 +65,11 @@ public class MattChatBot {
         ui.showGoodbye();
     }
 
+    /**
+     * Starts the chatbot, reading and writing the default save file.
+     *
+     * @param args command line arguments, which are not used
+     */
     public static void main(String[] args) {
         new MattChatBot(SAVE_FILE).run();
     }

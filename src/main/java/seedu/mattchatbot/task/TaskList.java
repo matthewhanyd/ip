@@ -91,6 +91,8 @@ public class TaskList {
 
     /**
      * Returns how many tasks the list holds.
+     *
+     * @return the number of tasks
      */
     public int size() {
         return tasks.size();
@@ -98,6 +100,8 @@ public class TaskList {
 
     /**
      * Returns whether the list has no tasks.
+     *
+     * @return true if there are no tasks
      */
     public boolean isEmpty() {
         return tasks.isEmpty();
