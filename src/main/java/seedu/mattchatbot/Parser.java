@@ -15,6 +15,10 @@ import seedu.mattchatbot.task.Todo;
  */
 public class Parser {
 
+    /** Not meant to be instantiated: every member of Parser is static. */
+    private Parser() {
+    }
+
     /** Keyword separating a deadline's description from its due date. */
     private static final String KEYWORD_BY = "/by";
 

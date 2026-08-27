@@ -34,6 +34,10 @@ public class Ui {
     /** Where the user's input is read from. */
     private final Scanner scanner = new Scanner(System.in);
 
+    /** Creates a Ui that talks to the user through the console. */
+    public Ui() {
+    }
+
     /**
      * Returns whether there is another line of input to read.
      * <p>
@@ -55,12 +59,16 @@ public class Ui {
         return scanner.nextLine().trim();
     }
 
-    /** Prints the banner and the welcome message. */
+    /**
+     * Prints the banner and the welcome message, once per session.
+     */
     public void showWelcome() {
         show(BANNER, "Hello! I'm MattChatBot.", "What can I do for you?");
     }
 
-    /** Prints the farewell message. */
+    /**
+     * Prints the farewell message, the last thing a session prints.
+     */
     public void showGoodbye() {
         show("Bye. Hope to see you again soon!");
     }
