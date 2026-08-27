@@ -212,7 +212,7 @@ public class MattChatBot {
      */
     private void listTasksOn(LocalDate date) {
         String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
-        ArrayList<Task> matches = tasks.occurringOn(date);
+        ArrayList<Task> matches = tasks.getTasksOn(date);
         if (matches.isEmpty()) {
             ui.show("Nothing on " + shownDate + ".");
             return;

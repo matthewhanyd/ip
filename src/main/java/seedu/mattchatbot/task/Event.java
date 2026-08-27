@@ -41,7 +41,7 @@ public class Event extends Task {
      * event occurs on each of those dates, not only the day it begins.
      */
     @Override
-    public boolean occursOn(LocalDate date) {
+    public boolean isOn(LocalDate date) {
         LocalDate start = from.toLocalDate();
         LocalDate end = to.toLocalDate();
         return !date.isBefore(start) && !date.isAfter(end);

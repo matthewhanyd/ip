@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
@@ -124,6 +125,6 @@ public class StorageTest {
 
     private static void writeLines(Path file, String... lines) throws IOException {
         Files.createDirectories(file.getParent());
-        Files.write(file, java.util.List.of(lines));
+        Files.write(file, List.of(lines));
     }
 }

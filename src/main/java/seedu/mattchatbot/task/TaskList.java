@@ -70,10 +70,10 @@ public class TaskList {
      * @param date the date being asked about
      * @return the matching tasks, in list order
      */
-    public ArrayList<Task> occurringOn(LocalDate date) {
+    public ArrayList<Task> getTasksOn(LocalDate date) {
         ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
-            if (task.occursOn(date)) {
+            if (task.isOn(date)) {
                 matches.add(task);
             }
         }
