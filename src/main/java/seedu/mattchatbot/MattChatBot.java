@@ -34,13 +34,27 @@ public class MattChatBot {
      */
     private String loadWarning;
 
+    /** Whether the last command handled asked the chatbot to exit. */
+    private boolean isExit = false;
+
     /**
      * Creates a chatbot that keeps its tasks in the given file.
      *
      * @param filePath where to load from and save to
      */
     public MattChatBot(String filePath) {
-        ui = new Ui();
+        this(filePath, new Ui());
+    }
+
+    /**
+     * Creates a chatbot that keeps its tasks in the given file and talks
+     * through the given Ui.
+     *
+     * @param filePath where to load from and save to
+     * @param ui       how replies reach the user
+     */
+    private MattChatBot(String filePath, Ui ui) {
+        this.ui = ui;
         storage = new Storage(filePath);
         try {
             tasks = new TaskList(storage.load());
@@ -54,6 +68,67 @@ public class MattChatBot {
             tasks = new TaskList();
             loadWarning = e.getMessage();
         }
+    }
+
+    /**
+     * Creates a chatbot on the default save file whose replies are returned as
+     * text rather than printed, for a GUI to display.
+     *
+     * @return a chatbot ready to answer {@link #getResponse(String)}
+     */
+    public static MattChatBot forGui() {
+        return new MattChatBot(SAVE_FILE, Ui.forGui());
+    }
+
+    /**
+     * Returns the greeting a GUI should show before the user types anything,
+     * including any complaint about the save file.
+     *
+     * @return the text of the greeting
+     */
+    public String getWelcomeMessage() {
+        ui.showWelcome();
+        if (loadWarning != null) {
+            ui.show(loadWarning, "The tasks I could read are still here.");
+        }
+        return ui.takeShownText();
+    }
+
+    /**
+     * Handles one line of input and returns what the chatbot says back.
+     * <p>
+     * This is the GUI's way in, and it is the counterpart of one turn of
+     * {@link #runCommandLoop()}: a failed command is reported in the returned
+     * text rather than thrown, so that one bad command does not end the
+     * conversation.
+     *
+     * @param input one line as the user typed it
+     * @return the reply, or an empty string if the input was blank
+     */
+    public String getResponse(String input) {
+        String command = input.trim();
+        if (command.isEmpty()) {
+            return "";
+        }
+        try {
+            isExit = handleCommand(command);
+            if (isExit) {
+                ui.showGoodbye();
+            }
+        } catch (MattChatBotException e) {
+            ui.showError(e.getMessage());
+        }
+        return ui.takeShownText();
+    }
+
+    /**
+     * Returns whether the user has asked to exit, so that a GUI knows to close
+     * its window.
+     *
+     * @return true once a bye command has been handled
+     */
+    public boolean isExit() {
+        return isExit;
     }
 
     /** Greets the user, handles commands until they say bye, then signs off. */

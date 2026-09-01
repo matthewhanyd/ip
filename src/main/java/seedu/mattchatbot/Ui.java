@@ -9,6 +9,13 @@ import java.util.Scanner;
  * one place: the rest of the code decides what happened, and asks Ui to say
  * it. Changing how replies look, or moving them to a different interface
  * later, then touches only this class.
+ * <p>
+ * A Ui works in one of two modes. The console mode prints replies to standard
+ * output and reads commands from standard input. The capturing mode, built by
+ * {@link #forGui()}, keeps replies in memory for a caller to collect with
+ * {@link #takeShownText()} instead. The GUI needs the second mode because a
+ * window has to be handed the reply as a string to put in a chat bubble,
+ * whereas the console can simply print it.
  */
 public class Ui {
 
@@ -31,11 +38,64 @@ public class Ui {
              CCC   H   H  A   A    T    BBBB    OOO     T
             """;
 
-    /** Where the user's input is read from. */
-    private final Scanner scanner = new Scanner(System.in);
+    /** Where the user's input is read from, or null when capturing for a GUI. */
+    private final Scanner scanner;
+
+    /** Replies shown since the last collection, or null when printing to the console. */
+    private final StringBuilder captured;
 
     /** Creates a Ui that talks to the user through the console. */
     public Ui() {
+        this(new Scanner(System.in), null);
+    }
+
+    /**
+     * Creates a Ui in one of its two modes.
+     *
+     * @param scanner  where commands are read from, or null when capturing
+     * @param captured where replies are collected, or null when printing
+     */
+    private Ui(Scanner scanner, StringBuilder captured) {
+        this.scanner = scanner;
+        this.captured = captured;
+    }
+
+    /**
+     * Returns a Ui that collects replies instead of printing them, for a caller
+     * that displays them itself.
+     * <p>
+     * It has no scanner: a GUI delivers input by calling the chatbot directly,
+     * so nothing here ever reads standard input.
+     *
+     * @return a Ui in capturing mode
+     */
+    public static Ui forGui() {
+        return new Ui(null, new StringBuilder());
+    }
+
+    /**
+     * Returns whether this Ui collects its replies rather than printing them.
+     *
+     * @return true if replies are being captured for a GUI
+     */
+    public boolean isCapturing() {
+        return captured != null;
+    }
+
+    /**
+     * Returns everything shown since this method was last called, and forgets
+     * it, so that each reply a GUI collects covers exactly one command.
+     *
+     * @return the captured text, with no trailing newline
+     * @throws IllegalStateException if this Ui prints to the console instead
+     */
+    public String takeShownText() {
+        if (captured == null) {
+            throw new IllegalStateException("This Ui prints its replies rather than capturing them.");
+        }
+        String text = captured.toString().strip();
+        captured.setLength(0);
+        return text;
     }
 
     /**
@@ -63,7 +123,13 @@ public class Ui {
      * Prints the banner and the welcome message, once per session.
      */
     public void showWelcome() {
-        show(BANNER, "Hello! I'm MattChatBot.", "What can I do for you?");
+        // The banner is ASCII art, so it only lines up in the console's
+        // fixed-width font and is left out of the GUI's greeting.
+        if (isCapturing()) {
+            show("Hello! I'm MattChatBot.", "What can I do for you?");
+        } else {
+            show(BANNER, "Hello! I'm MattChatBot.", "What can I do for you?");
+        }
     }
 
     /**
@@ -93,12 +159,20 @@ public class Ui {
     }
 
     /**
-     * Prints the given lines as one block, wrapped in horizontal dividers, so
-     * that every reply the bot makes is formatted consistently.
+     * Shows the given lines as one block: printed between horizontal dividers
+     * in console mode, so every reply looks the same, or appended to the
+     * captured text in capturing mode, where the GUI draws its own boundary
+     * around each reply and dividers would only be noise.
      *
-     * @param lines the lines to print between the dividers
+     * @param lines the lines making up one reply
      */
     public void show(String... lines) {
+        if (captured != null) {
+            for (String line : lines) {
+                captured.append(line).append(System.lineSeparator());
+            }
+            return;
+        }
         System.out.println(DIVIDER);
         for (String line : lines) {
             System.out.println(line);

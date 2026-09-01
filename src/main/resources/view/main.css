@@ -1,0 +1,87 @@
+/*
+ * Look and feel of the chatbot window. Kept out of the FXML so that the
+ * layout files stay about structure and this file stays about appearance.
+ */
+
+.root-pane {
+    -fx-background-color: #f3f5f4;
+}
+
+/* The scroll pane and its viewport both paint a background, so both are
+   cleared, otherwise a grey band shows through behind the conversation. */
+.conversation-scroll,
+.conversation-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.conversation-scroll {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.conversation {
+    -fx-background-color: #f3f5f4;
+}
+
+.dialog-text {
+    -fx-background-radius: 14px;
+    -fx-padding: 10px 14px;
+    -fx-font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.user-dialog .dialog-text {
+    -fx-background-color: #2c6a44;
+    -fx-text-fill: white;
+}
+
+.bot-dialog .dialog-text {
+    -fx-background-color: white;
+    -fx-text-fill: #1d2320;
+    -fx-border-color: #dde3de;
+    -fx-border-radius: 14px;
+}
+
+.avatar {
+    -fx-background-radius: 18px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.user-dialog .avatar {
+    -fx-background-color: #2c6a44;
+}
+
+.bot-dialog .avatar {
+    -fx-background-color: #5c6560;
+}
+
+.composer {
+    -fx-background-color: white;
+    -fx-border-color: #dde3de transparent transparent transparent;
+}
+
+.composer .text-field {
+    -fx-background-radius: 18px;
+    -fx-background-color: #eef1ef;
+    -fx-padding: 8px 14px;
+    -fx-font-size: 13px;
+}
+
+.composer .button {
+    -fx-background-radius: 18px;
+    -fx-background-color: #2c6a44;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 18px;
+}
+
+.composer .button:hover {
+    -fx-background-color: #235737;
+}
+
+.composer .button:disabled {
+    -fx-opacity: 0.5;
+}
