@@ -17,6 +17,19 @@ repositories {
 dependencies {
     String jUnitVersion = '5.14.4'
 
+    // JavaFX ships a separate native binary per platform, so every platform the
+    // JAR might run on has to be listed here, not just this machine's. The
+    // tutorial's list predates Apple Silicon: mac-aarch64 is the classifier an
+    // M-series Mac needs, and 'mac' alone silently fails to start there.
+    String javaFxVersion = '25.0.4'
+    List<String> javaFxPlatforms = ['win', 'mac', 'mac-aarch64', 'linux']
+    List<String> javaFxModules = ['base', 'controls', 'fxml', 'graphics']
+    for (String module : javaFxModules) {
+        for (String platform : javaFxPlatforms) {
+            implementation "org.openjfx:javafx-${module}:${javaFxVersion}:${platform}"
+        }
+    }
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:${jUnitVersion}"
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
@@ -44,7 +57,13 @@ test {
 }
 
 application {
-    mainClass = 'seedu.mattchatbot.MattChatBot'
+    // Launcher, not Main: a class that extends Application cannot be the main
+    // class of a fat JAR, because JavaFX refuses to start when its own module
+    // is on the classpath rather than the module path.
+    mainClass = 'seedu.mattchatbot.Launcher'
+    // JavaFX loads its own native libraries, which Java 25 warns about unless
+    // the module is granted native access up front.
+    applicationDefaultJvmArgs = ['--enable-native-access=javafx.graphics']
 }
 
 jar {
@@ -61,3 +80,4 @@ shadowJar {
 run {
     standardInput = System.in
 }
+

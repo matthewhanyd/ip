@@ -1,6 +1,8 @@
 # MattChatBot
 
-MattChatBot is a greenfield Java chatbot project. Given below are instructions on how to set it up.
+MattChatBot is a greenfield Java chatbot project. It runs as a JavaFX window,
+and the original console version is still there for anyone who prefers it.
+Given below are instructions on how to set it up.
 
 ## Setting up in Intellij
 
@@ -110,9 +112,37 @@ on first use, so there is nothing to set up.
 ./gradlew run
 ```
 
-`./gradlew build` compiles the code and runs the tests. Gradle downloads the
-right Gradle version itself the first time, so nothing needs installing
-beyond a JDK 25.
+That opens the chat window. Type a command in the box at the bottom and press
+Enter or click Send; the conversation appears above it, your messages on the
+right and the bot's on the left. `bye` closes the window after showing its
+farewell. Every command listed above works the same way as it does in the
+console.
+
+The window is built with JavaFX. Its dependencies are declared for Windows,
+Linux and both kinds of Mac, so the same JAR runs on any of them, and the
+program starts from a small `Launcher` class rather than the JavaFX
+`Application` subclass itself, which is what lets it run from a packaged JAR.
+
+To use the console version instead:
+
+```
+./gradlew build
+java -cp build/classes/java/main seedu.mattchatbot.MattChatBot
+```
+
+`./gradlew build` compiles the code, runs the tests and runs Checkstyle.
+Gradle downloads the right Gradle version itself the first time, so nothing
+needs installing beyond a JDK 25.
+
+## Checking the coding style
+
+```
+./gradlew checkstyleMain checkstyleTest
+```
+
+Checkstyle enforces the SE-EDU Java coding standard using the configuration in
+`config/checkstyle`. It also runs as part of `./gradlew build`, so a style
+violation fails the build rather than waiting to be spotted in review.
 
 ## Packaging as a JAR
 
@@ -120,19 +150,24 @@ beyond a JDK 25.
 ./gradlew shadowJar
 ```
 
-This produces `build/libs/mattchatbot.jar`, which bundles its dependencies.
-Copy it into a folder of its own and run it with:
+This produces `build/libs/mattchatbot.jar`, which bundles its dependencies,
+JavaFX included. Copy it into a folder of its own and run it with:
 
 ```
 java -jar "mattchatbot.jar"
 ```
 
-It creates its `data` folder alongside the JAR on first use.
+The window opens, and the JAR creates its `data` folder alongside itself on
+first use.
 
 ## Running from the command line
 
+Compiling by hand needs JavaFX on the classpath, so `./gradlew run` is the
+easier route. The console version has no such dependency and still compiles on
+its own:
+
 ```
-javac -d bin $(find src/main/java -name '*.java')
+javac -d bin $(find src/main/java -name '*.java' -not -path '*/gui/*' -not -name 'Launcher.java')
 java -cp bin seedu.mattchatbot.MattChatBot
 ```
 
