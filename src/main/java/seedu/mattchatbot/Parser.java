@@ -1,6 +1,7 @@
 package seedu.mattchatbot;
 
 import java.time.LocalDate;
+
 import seedu.mattchatbot.task.Deadline;
 import seedu.mattchatbot.task.Event;
 import seedu.mattchatbot.task.Todo;
@@ -15,10 +16,6 @@ import seedu.mattchatbot.task.Todo;
  */
 public class Parser {
 
-    /** Not meant to be instantiated: every member of Parser is static. */
-    private Parser() {
-    }
-
     /** Keyword separating a deadline's description from its due date. */
     private static final String KEYWORD_BY = "/by";
 
@@ -27,6 +24,10 @@ public class Parser {
 
     /** Keyword separating an event's start time from its end time. */
     private static final String KEYWORD_TO = "/to";
+
+    /** Not meant to be instantiated: every member of Parser is static. */
+    private Parser() {
+    }
 
     /**
      * Reads the command word, i.e. the first word of the input.

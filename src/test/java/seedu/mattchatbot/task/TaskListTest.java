@@ -57,15 +57,15 @@ public class TaskListTest {
 
     @Test
     public void get_emptyList_exceptionThrown() {
-        MattChatBotException e = assertThrows(MattChatBotException.class,
-                () -> new TaskList().get(0));
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                new TaskList().get(0));
         assertEquals("Your list is empty, so there is no task 1 yet.", e.getMessage());
     }
 
     @Test
     public void get_indexPastEnd_exceptionThrown() {
-        MattChatBotException e = assertThrows(MattChatBotException.class,
-                () -> listOfThree().get(3));
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                listOfThree().get(3));
         assertEquals("You have 3 tasks, so there is no task 4. Type list to see them.",
                 e.getMessage());
     }

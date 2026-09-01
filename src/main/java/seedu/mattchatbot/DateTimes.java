@@ -17,10 +17,6 @@ import java.time.format.ResolverStyle;
  */
 public class DateTimes {
 
-    /** Not meant to be instantiated: every member of DateTimes is static. */
-    private DateTimes() {
-    }
-
     /**
      * Date on its own, as typed by the user, e.g. {@code 2019-10-15}.
      * <p>
@@ -53,6 +49,10 @@ public class DateTimes {
      */
     private static final DateTimeFormatter FILE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+    /** Not meant to be instantiated: every member of DateTimes is static. */
+    private DateTimes() {
+    }
 
     /**
      * Reads a date, with an optional time, as typed by the user.
