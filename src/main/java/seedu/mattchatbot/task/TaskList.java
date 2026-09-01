@@ -2,6 +2,7 @@ package seedu.mattchatbot.task;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import seedu.mattchatbot.Command;
 import seedu.mattchatbot.MattChatBotException;
@@ -33,12 +34,16 @@ public class TaskList {
     }
 
     /**
-     * Adds a task to the end of the list.
+     * Adds tasks to the end of the list, in the order given.
+     * <p>
+     * Takes varargs rather than a single task because adding several at once
+     * is common when a list is being set up, and a caller that has just one
+     * still writes the same call as before.
      *
-     * @param task the task to add
+     * @param tasksToAdd the tasks to add
      */
-    public void add(Task task) {
-        tasks.add(task);
+    public void add(Task... tasksToAdd) {
+        Collections.addAll(tasks, tasksToAdd);
     }
 
     /**
