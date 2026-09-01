@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'checkstyle'
     id 'com.gradleup.shadow' version '9.5.1'
 }
 
@@ -20,6 +21,12 @@ dependencies {
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
+}
+
+checkstyle {
+    // The config in config/checkstyle is the SE-EDU one used by AddressBook Level 3,
+    // so Checkstyle enforces the same standard AGENTS.md already asks for by hand.
+    toolVersion = '14.1.0'
 }
 
 test {

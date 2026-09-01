@@ -3,6 +3,7 @@ package seedu.mattchatbot;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+
 import seedu.mattchatbot.task.Task;
 import seedu.mattchatbot.task.TaskList;
 
@@ -112,43 +113,43 @@ public class MattChatBot {
         String argument = Parser.parseArgument(input);
 
         return switch (command) {
-        case BYE -> true;
-        case LIST -> {
-            listTasks();
-            yield false;
-        }
-        case ON -> {
-            listTasksOn(Parser.parseOnDate(argument));
-            yield false;
-        }
-        case FIND -> {
-            listMatchingTasks(Parser.parseKeyword(argument));
-            yield false;
-        }
-        case MARK -> {
-            setDone(Parser.parseTaskNumber(argument, Command.MARK), true);
-            yield false;
-        }
-        case UNMARK -> {
-            setDone(Parser.parseTaskNumber(argument, Command.UNMARK), false);
-            yield false;
-        }
-        case DELETE -> {
-            deleteTask(Parser.parseTaskNumber(argument, Command.DELETE));
-            yield false;
-        }
-        case TODO -> {
-            addTask(Parser.parseTodo(argument));
-            yield false;
-        }
-        case DEADLINE -> {
-            addTask(Parser.parseDeadline(argument));
-            yield false;
-        }
-        case EVENT -> {
-            addTask(Parser.parseEvent(argument));
-            yield false;
-        }
+            case BYE -> true;
+            case LIST -> {
+                listTasks();
+                yield false;
+            }
+            case ON -> {
+                listTasksOn(Parser.parseOnDate(argument));
+                yield false;
+            }
+            case FIND -> {
+                listMatchingTasks(Parser.parseKeyword(argument));
+                yield false;
+            }
+            case MARK -> {
+                setDone(Parser.parseTaskNumber(argument, Command.MARK), true);
+                yield false;
+            }
+            case UNMARK -> {
+                setDone(Parser.parseTaskNumber(argument, Command.UNMARK), false);
+                yield false;
+            }
+            case DELETE -> {
+                deleteTask(Parser.parseTaskNumber(argument, Command.DELETE));
+                yield false;
+            }
+            case TODO -> {
+                addTask(Parser.parseTodo(argument));
+                yield false;
+            }
+            case DEADLINE -> {
+                addTask(Parser.parseDeadline(argument));
+                yield false;
+            }
+            case EVENT -> {
+                addTask(Parser.parseEvent(argument));
+                yield false;
+            }
         };
     }
 

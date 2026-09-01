@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
 import seedu.mattchatbot.task.Deadline;
 import seedu.mattchatbot.task.Event;
 import seedu.mattchatbot.task.Task;
@@ -17,6 +18,9 @@ import seedu.mattchatbot.task.Todo;
  */
 public class Storage {
 
+    /** Separates the fields of one task within a line of the save file. */
+    private static final String SEPARATOR = " | ";
+
     /**
      * Where this Storage keeps the task list.
      * <p>
@@ -24,9 +28,6 @@ public class Storage {
      * and a test can point at a scratch file instead of the real one.
      */
     private final Path filePath;
-
-    /** Separates the fields of one task within a line of the save file. */
-    private static final String SEPARATOR = " | ";
 
     /** How many damaged lines the most recent {@link #load()} had to skip. */
     private int skippedLineCount = 0;
@@ -118,10 +119,10 @@ public class Storage {
         // Each type has a fixed field count, so a line with the wrong number
         // of fields is damaged and is rejected before any field is read.
         int expectedFields = switch (type) {
-        case "T" -> 3;
-        case "D" -> 4;
-        case "E" -> 5;
-        default -> throw new MattChatBotException("Unknown task type: " + type);
+            case "T" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+            default -> throw new MattChatBotException("Unknown task type: " + type);
         };
         if (fields.length != expectedFields) {
             throw new MattChatBotException("Expected " + expectedFields
@@ -131,11 +132,11 @@ public class Storage {
             throw new MattChatBotException("Task has no description");
         }
         Task task = switch (type) {
-        case "T" -> new Todo(fields[2]);
-        case "D" -> new Deadline(fields[2], DateTimes.parse(fields[3]));
-        case "E" -> new Event(fields[2], DateTimes.parse(fields[3]),
-                DateTimes.parse(fields[4]));
-        default -> throw new MattChatBotException("Unknown task type: " + type);
+            case "T" -> new Todo(fields[2]);
+            case "D" -> new Deadline(fields[2], DateTimes.parse(fields[3]));
+            case "E" -> new Event(fields[2], DateTimes.parse(fields[3]),
+                    DateTimes.parse(fields[4]));
+            default -> throw new MattChatBotException("Unknown task type: " + type);
         };
         if (fields[1].equals("1")) {
             task.markAsDone();
