@@ -25,9 +25,9 @@ public class TaskListTest {
 
     private static TaskList listOfThree() {
         TaskList tasks = new TaskList();
-        tasks.add(new Todo("read book"));
-        tasks.add(new Deadline("return book", at(2019, 10, 15)));
-        tasks.add(new Event("orientation", at(2019, 10, 14), at(2019, 10, 18)));
+        tasks.add(new Todo("read book"),
+                new Deadline("return book", at(2019, 10, 15)),
+                new Event("orientation", at(2019, 10, 14), at(2019, 10, 18)));
         return tasks;
     }
 
@@ -152,6 +152,23 @@ public class TaskListTest {
     public void getTasksMatching_dateTextNotSearched_nothingMatched() {
         // Only the description is searched, not the formatted dates.
         assertTrue(listOfThree().getTasksMatching("Oct").isEmpty());
+    }
+
+    @Test
+    public void add_severalTasksAtOnce_allAddedInOrder() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("first"), new Todo("second"), new Todo("third"));
+        assertEquals(3, tasks.size());
+        assertEquals("[T][ ] first", tasks.asList().get(0).toString());
+        assertEquals("[T][ ] third", tasks.asList().get(2).toString());
+    }
+
+    @Test
+    public void add_noTasks_listUnchanged() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("only one"));
+        tasks.add();
+        assertEquals(1, tasks.size());
     }
 
     @Test
