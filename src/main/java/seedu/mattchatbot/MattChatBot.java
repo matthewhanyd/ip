@@ -1,7 +1,6 @@
 package seedu.mattchatbot;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import seedu.mattchatbot.task.Task;
@@ -295,7 +294,7 @@ public class MattChatBot {
      * @param date the date to report on
      */
     private void listTasksOn(LocalDate date) {
-        String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
+        String shownDate = DateTimes.format(date);
         showTasks(tasks.getTasksOn(date),
                 "Here is what you have on " + shownDate + ":",
                 "Nothing on " + shownDate + ".");
