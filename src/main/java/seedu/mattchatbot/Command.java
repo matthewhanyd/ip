@@ -95,6 +95,9 @@ public enum Command {
             }
             keywords.append(command.keyword);
         }
+        // Used inside "I understand: ..." messages, which would read as a
+        // dangling sentence if the enum ever had no constants left.
+        assert !keywords.isEmpty() : "the chatbot always understands at least one command";
         return keywords.toString();
     }
 }
