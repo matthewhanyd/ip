@@ -283,13 +283,10 @@ public class MattChatBot {
 
     /** Prints every stored task, numbered from 1, with its type and status. */
     private void listTasks() {
-        if (tasks.isEmpty()) {
-            ui.show("Your list is empty. Add something with "
-                    + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
-                    + " or " + Command.EVENT.getKeyword() + ".");
-            return;
-        }
-        ui.show(numbered("Here are the tasks in your list:", tasks.asList()));
+        showTasks(tasks.asList(), "Here are the tasks in your list:",
+                "Your list is empty. Add something with "
+                        + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
+                        + " or " + Command.EVENT.getKeyword() + ".");
     }
 
     /**
@@ -299,12 +296,9 @@ public class MattChatBot {
      */
     private void listTasksOn(LocalDate date) {
         String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
-        ArrayList<Task> matches = tasks.getTasksOn(date);
-        if (matches.isEmpty()) {
-            ui.show("Nothing on " + shownDate + ".");
-            return;
-        }
-        ui.show(numbered("Here is what you have on " + shownDate + ":", matches));
+        showTasks(tasks.getTasksOn(date),
+                "Here is what you have on " + shownDate + ":",
+                "Nothing on " + shownDate + ".");
     }
 
     /**
@@ -313,12 +307,28 @@ public class MattChatBot {
      * @param keyword the text the user is looking for
      */
     private void listMatchingTasks(String keyword) {
-        ArrayList<Task> matches = tasks.getTasksMatching(keyword);
-        if (matches.isEmpty()) {
-            ui.show("No tasks match \"" + keyword + "\".");
+        showTasks(tasks.getTasksMatching(keyword),
+                "Here are the matching tasks in your list:",
+                "No tasks match \"" + keyword + "\".");
+    }
+
+    /**
+     * Shows a set of tasks, or says why there are none to show.
+     * <p>
+     * Every command that lists tasks needs the same two cases, and only the
+     * wording differs, so each caller supplies its own wording and leaves the
+     * shape of the reply here.
+     *
+     * @param shown        the tasks to list
+     * @param heading      the line above them when there are some
+     * @param emptyMessage what to say instead when there are none
+     */
+    private void showTasks(ArrayList<Task> shown, String heading, String emptyMessage) {
+        if (shown.isEmpty()) {
+            ui.show(emptyMessage);
             return;
         }
-        ui.show(numbered("Here are the matching tasks in your list:", matches));
+        ui.show(numbered(heading, shown));
     }
 
     /**
