@@ -78,7 +78,7 @@ public class Ui {
      *
      * @return true if replies are being captured for a GUI
      */
-    public boolean isCapturing() {
+    private boolean isCapturing() {
         return captured != null;
     }
 
@@ -146,16 +146,6 @@ public class Ui {
      */
     public void showError(String message) {
         show(message);
-    }
-
-    /**
-     * Prints the problem met while loading the save file, and says what the
-     * chatbot is doing about it.
-     *
-     * @param message what went wrong, written for the user
-     */
-    public void showLoadingError(String message) {
-        show(message, "Starting with an empty list instead.");
     }
 
     /**
