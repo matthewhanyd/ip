@@ -21,6 +21,30 @@ public class Storage {
     /** Separates the fields of one task within a line of the save file. */
     private static final String SEPARATOR = " | ";
 
+    /** Position of the type marker within a saved line, e.g. {@code T}. */
+    private static final int TYPE_FIELD = 0;
+
+    /** Position of the done flag within a saved line, {@code 0} or {@code 1}. */
+    private static final int STATUS_FIELD = 1;
+
+    /** Position of the description within a saved line. */
+    private static final int DESCRIPTION_FIELD = 2;
+
+    /** Position of a deadline's due date, or an event's start. */
+    private static final int FIRST_DATE_FIELD = 3;
+
+    /** Position of an event's end. */
+    private static final int SECOND_DATE_FIELD = 4;
+
+    /** How many fields a saved todo has: type, status, description. */
+    private static final int TODO_FIELD_COUNT = 3;
+
+    /** How many fields a saved deadline has: a todo's, plus the due date. */
+    private static final int DEADLINE_FIELD_COUNT = 4;
+
+    /** How many fields a saved event has: a todo's, plus a start and an end. */
+    private static final int EVENT_FIELD_COUNT = 5;
+
     /**
      * Where this Storage keeps the task list.
      * <p>
@@ -115,35 +139,73 @@ public class Storage {
      */
     private static Task parse(String line) throws MattChatBotException {
         String[] fields = line.split("\\s*\\|\\s*");
-        String type = fields.length > 0 ? fields[0] : "";
-        // Each type has a fixed field count, so a line with the wrong number
-        // of fields is damaged and is rejected before any field is read.
-        int expectedFields = switch (type) {
-            case "T" -> 3;
-            case "D" -> 4;
-            case "E" -> 5;
+        String type = fields.length > 0 ? fields[TYPE_FIELD] : "";
+        checkFieldCount(type, fields.length);
+        Task task = createTask(type, fields);
+        applyStatus(task, fields[STATUS_FIELD]);
+        return task;
+    }
+
+    /**
+     * Rejects a line that does not hold the number of fields its type needs.
+     * <p>
+     * Checked before any field is read, so that the rest of the parsing can
+     * index into the line without guarding each access.
+     *
+     * @param type   the type marker read from the line
+     * @param actual how many fields the line actually holds
+     * @throws MattChatBotException if the type is unknown or the count is wrong
+     */
+    private static void checkFieldCount(String type, int actual) throws MattChatBotException {
+        int expected = switch (type) {
+            case "T" -> TODO_FIELD_COUNT;
+            case "D" -> DEADLINE_FIELD_COUNT;
+            case "E" -> EVENT_FIELD_COUNT;
             default -> throw new MattChatBotException("Unknown task type: " + type);
         };
-        if (fields.length != expectedFields) {
-            throw new MattChatBotException("Expected " + expectedFields
-                    + " fields but found " + fields.length);
+        if (actual != expected) {
+            throw new MattChatBotException("Expected " + expected
+                    + " fields but found " + actual);
         }
-        if (fields[2].isBlank()) {
+    }
+
+    /**
+     * Builds the task a line describes, not yet marked done or not done.
+     *
+     * @param type   the type marker read from the line
+     * @param fields the line's fields, already counted by {@link #checkFieldCount}
+     * @return the task described
+     * @throws MattChatBotException if the description or a date is unusable
+     */
+    private static Task createTask(String type, String[] fields) throws MattChatBotException {
+        String description = fields[DESCRIPTION_FIELD];
+        if (description.isBlank()) {
             throw new MattChatBotException("Task has no description");
         }
-        Task task = switch (type) {
-            case "T" -> new Todo(fields[2]);
-            case "D" -> new Deadline(fields[2], DateTimes.parse(fields[3]));
-            case "E" -> new Event(fields[2], DateTimes.parse(fields[3]),
-                    DateTimes.parse(fields[4]));
+        return switch (type) {
+            case "T" -> new Todo(description);
+            case "D" -> new Deadline(description, DateTimes.parse(fields[FIRST_DATE_FIELD]));
+            case "E" -> new Event(description, DateTimes.parse(fields[FIRST_DATE_FIELD]),
+                    DateTimes.parse(fields[SECOND_DATE_FIELD]));
             default -> throw new MattChatBotException("Unknown task type: " + type);
         };
-        if (fields[1].equals("1")) {
+    }
+
+    /**
+     * Applies a line's done flag to the task built from it.
+     *
+     * @param task   the task just built
+     * @param status the flag read from the line
+     * @throws MattChatBotException if the flag is neither {@code 0} nor {@code 1}
+     */
+    private static void applyStatus(Task task, String status) throws MattChatBotException {
+        if (status.equals("1")) {
             task.markAsDone();
-        } else if (!fields[1].equals("0")) {
+        } else if (status.equals("0")) {
+            task.markAsNotDone();
+        } else {
             throw new MattChatBotException("Status must be 0 or 1");
         }
-        return task;
     }
 
     /**
