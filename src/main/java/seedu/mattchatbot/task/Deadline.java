@@ -11,6 +11,9 @@ import seedu.mattchatbot.DateTimes;
  */
 public class Deadline extends Task {
 
+    /** The marker shown in a deadline's type box and written to the save file. */
+    public static final String TYPE_ICON = "D";
+
     /** When the task is due. */
     protected LocalDateTime by;
 
@@ -27,7 +30,7 @@ public class Deadline extends Task {
 
     @Override
     public String getTypeIcon() {
-        return "D";
+        return TYPE_ICON;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class Deadline extends Task {
 
     @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + DateTimes.toFileString(by);
+        return super.toFileFormat() + FIELD_SEPARATOR + DateTimes.toFileString(by);
     }
 
     @Override

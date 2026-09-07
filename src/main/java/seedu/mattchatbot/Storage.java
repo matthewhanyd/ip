@@ -18,9 +18,6 @@ import seedu.mattchatbot.task.Todo;
  */
 public class Storage {
 
-    /** Separates the fields of one task within a line of the save file. */
-    private static final String SEPARATOR = " | ";
-
     /** Position of the type marker within a saved line, e.g. {@code T}. */
     private static final int TYPE_FIELD = 0;
 
@@ -158,9 +155,9 @@ public class Storage {
      */
     private static void checkFieldCount(String type, int actual) throws MattChatBotException {
         int expected = switch (type) {
-            case "T" -> TODO_FIELD_COUNT;
-            case "D" -> DEADLINE_FIELD_COUNT;
-            case "E" -> EVENT_FIELD_COUNT;
+            case Todo.TYPE_ICON -> TODO_FIELD_COUNT;
+            case Deadline.TYPE_ICON -> DEADLINE_FIELD_COUNT;
+            case Event.TYPE_ICON -> EVENT_FIELD_COUNT;
             default -> throw new MattChatBotException("Unknown task type: " + type);
         };
         if (actual != expected) {
@@ -183,9 +180,10 @@ public class Storage {
             throw new MattChatBotException("Task has no description");
         }
         return switch (type) {
-            case "T" -> new Todo(description);
-            case "D" -> new Deadline(description, DateTimes.parse(fields[FIRST_DATE_FIELD]));
-            case "E" -> new Event(description, DateTimes.parse(fields[FIRST_DATE_FIELD]),
+            case Todo.TYPE_ICON -> new Todo(description);
+            case Deadline.TYPE_ICON ->
+                new Deadline(description, DateTimes.parse(fields[FIRST_DATE_FIELD]));
+            case Event.TYPE_ICON -> new Event(description, DateTimes.parse(fields[FIRST_DATE_FIELD]),
                     DateTimes.parse(fields[SECOND_DATE_FIELD]));
             default -> throw new MattChatBotException("Unknown task type: " + type);
         };
