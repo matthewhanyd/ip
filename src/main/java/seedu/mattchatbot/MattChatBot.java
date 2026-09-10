@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import seedu.mattchatbot.task.Task;
 import seedu.mattchatbot.task.TaskList;
+import seedu.mattchatbot.task.TaskUpdate;
 
 /**
  * Entry point of the MattChatBot chatbot.
@@ -226,6 +227,11 @@ public class MattChatBot {
                 deleteTask(Parser.parseTaskNumber(argument, Command.DELETE));
                 yield false;
             }
+            case UPDATE -> {
+                updateTask(Parser.parseUpdateTarget(argument),
+                        Parser.parseUpdateChanges(argument));
+                yield false;
+            }
             case TODO -> {
                 addTask(Parser.parseTodo(argument));
                 yield false;
@@ -287,6 +293,25 @@ public class MattChatBot {
         }
         storage.save(tasks);
         ui.show(confirmation, "  " + task);
+    }
+
+    /**
+     * Changes parts of the task at the given position and confirms the result.
+     * <p>
+     * The task decides whether the requested parts suit its type, and refuses
+     * before changing anything, so a rejected update leaves the list as it
+     * was and nothing is saved.
+     *
+     * @param index   the task's position, 0-based
+     * @param changes the parts to change
+     * @throws MattChatBotException if there is no such task, the update does
+     *         not suit its type, or saving fails
+     */
+    private void updateTask(int index, TaskUpdate changes) throws MattChatBotException {
+        Task task = tasks.get(index);
+        task.applyUpdate(changes);
+        storage.save(tasks);
+        ui.show("Got it. I've updated this task:", "  " + task);
     }
 
     /** Prints every stored task, numbered from 1, with its type and status. */

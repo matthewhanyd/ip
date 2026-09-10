@@ -1,9 +1,12 @@
 package seedu.mattchatbot;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import seedu.mattchatbot.task.Deadline;
 import seedu.mattchatbot.task.Event;
+import seedu.mattchatbot.task.TaskUpdate;
 import seedu.mattchatbot.task.Todo;
 
 /**
@@ -24,6 +27,15 @@ public class Parser {
 
     /** Keyword separating an event's start time from its end time. */
     private static final String KEYWORD_TO = "/to";
+
+    /**
+     * Every marker an update command may carry.
+     * <p>
+     * Listed together because an update, unlike the commands that build a
+     * task, does not know in advance which markers it will meet: it has to
+     * find whichever come next, in whatever order they were typed.
+     */
+    private static final String[] UPDATE_MARKERS = {KEYWORD_BY, KEYWORD_FROM, KEYWORD_TO};
 
     /** Not meant to be instantiated: every member of Parser is static. */
     private Parser() {
@@ -191,6 +203,103 @@ public class Parser {
                     + Command.FIND.getKeyword() + " book");
         }
         return argument;
+    }
+
+    /**
+     * Reads which task an update command refers to.
+     *
+     * @param argument everything the user typed after the command word
+     * @return the matching 0-based index
+     * @throws MattChatBotException if the number is missing or is not a number
+     */
+    public static int parseUpdateTarget(String argument) throws MattChatBotException {
+        if (argument.isEmpty()) {
+            String keyword = Command.UPDATE.getKeyword();
+            throw new MattChatBotException("Which task should I " + keyword
+                    + "? Try: " + keyword + " 2 new description");
+        }
+        return parseTaskNumber(splitOffCommandWord(argument)[0], Command.UPDATE);
+    }
+
+    /**
+     * Reads the parts an update command asks to change.
+     * <p>
+     * Whatever sits between the task number and the first marker is the new
+     * description, and each marker's value runs up to the next marker or the
+     * end of the line. Parts that were not typed stay null, which is how a
+     * user changes an event's end time without restating its start.
+     *
+     * @param argument everything the user typed after the command word
+     * @return the requested changes, with every date already parsed
+     * @throws MattChatBotException if nothing was asked for, or a date is unusable
+     */
+    public static TaskUpdate parseUpdateChanges(String argument) throws MattChatBotException {
+        String changes = parseArgument(argument);
+        int firstMarker = indexOfNextMarker(changes, 0);
+        String description = firstMarker < 0 ? changes : changes.substring(0, firstMarker);
+        TaskUpdate update = new TaskUpdate(
+                blankToNull(description),
+                parseMarkerValue(changes, KEYWORD_BY),
+                parseMarkerValue(changes, KEYWORD_FROM),
+                parseMarkerValue(changes, KEYWORD_TO));
+        if (update.isEmpty()) {
+            String keyword = Command.UPDATE.getKeyword();
+            throw new MattChatBotException("Tell me what to change. Try: " + keyword
+                    + " 2 new description, or " + keyword + " 2 /by 2019-12-01");
+        }
+        return update;
+    }
+
+    /**
+     * Returns where the next update marker starts, at or after a position.
+     *
+     * @param text the text being read
+     * @param from where to start looking
+     * @return the earliest marker's position, or -1 if none is left
+     */
+    private static int indexOfNextMarker(String text, int from) {
+        return Arrays.stream(UPDATE_MARKERS)
+                .mapToInt(marker -> text.indexOf(marker, from))
+                .filter(at -> at >= 0)
+                .min()
+                .orElse(-1);
+    }
+
+    /**
+     * Reads one marker's value, or null if the marker was not typed.
+     *
+     * @param changes the text after the task number
+     * @param marker  the marker to look for, e.g. {@code /by}
+     * @return the moment it names, or null if the marker is absent
+     * @throws MattChatBotException if the marker was given nothing, or an unreadable date
+     */
+    private static LocalDateTime parseMarkerValue(String changes, String marker)
+            throws MattChatBotException {
+        int at = changes.indexOf(marker);
+        if (at < 0) {
+            return null;
+        }
+        int valueStart = at + marker.length();
+        int nextMarker = indexOfNextMarker(changes, valueStart);
+        String value = nextMarker < 0
+                ? changes.substring(valueStart)
+                : changes.substring(valueStart, nextMarker);
+        if (value.isBlank()) {
+            throw new MattChatBotException("The " + marker + " needs a date after it. Try: "
+                    + Command.UPDATE.getKeyword() + " 2 " + marker + " 2019-12-01");
+        }
+        return DateTimes.parse(value);
+    }
+
+    /**
+     * Returns the text with surrounding spaces removed, or null if it is blank.
+     *
+     * @param text the text to tidy
+     * @return the trimmed text, or null if nothing was left
+     */
+    private static String blankToNull(String text) {
+        String trimmed = text.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     /**

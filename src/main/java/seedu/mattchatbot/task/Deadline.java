@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import seedu.mattchatbot.DateTimes;
+import seedu.mattchatbot.MattChatBotException;
 
 /**
  * A task that must be done before a given point in time,
@@ -31,6 +32,29 @@ public class Deadline extends Task {
     @Override
     public String getTypeIcon() {
         return TYPE_ICON;
+    }
+
+    @Override
+    public String getTypeName() {
+        return "deadline";
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * A deadline has a single due date, so it accepts {@code /by} and turns
+     * down the {@code /from} and {@code /to} that belong to an event.
+     */
+    @Override
+    public void applyUpdate(TaskUpdate update) throws MattChatBotException {
+        if (update.hasFrom() || update.hasTo()) {
+            throw new MattChatBotException("A deadline has no start and end times. "
+                    + "Use /by to change when it is due.");
+        }
+        applyDescription(update);
+        if (update.hasBy()) {
+            by = update.by();
+        }
     }
 
     @Override

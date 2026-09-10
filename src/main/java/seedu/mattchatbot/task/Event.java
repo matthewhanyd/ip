@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import seedu.mattchatbot.DateTimes;
+import seedu.mattchatbot.MattChatBotException;
 
 /**
  * A task that runs from one point in time to another,
@@ -36,6 +37,33 @@ public class Event extends Task {
     @Override
     public String getTypeIcon() {
         return TYPE_ICON;
+    }
+
+    @Override
+    public String getTypeName() {
+        return "event";
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * An event runs between two times, so it accepts {@code /from} and
+     * {@code /to}, either on its own, and turns down the {@code /by} that
+     * belongs to a deadline.
+     */
+    @Override
+    public void applyUpdate(TaskUpdate update) throws MattChatBotException {
+        if (update.hasBy()) {
+            throw new MattChatBotException("An event has no /by. "
+                    + "Use /from and /to to change when it runs.");
+        }
+        applyDescription(update);
+        if (update.hasFrom()) {
+            from = update.from();
+        }
+        if (update.hasTo()) {
+            to = update.to();
+        }
     }
 
     /**
