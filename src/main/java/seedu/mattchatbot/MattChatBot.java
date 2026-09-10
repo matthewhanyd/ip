@@ -2,6 +2,8 @@ package seedu.mattchatbot;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import seedu.mattchatbot.task.Task;
 import seedu.mattchatbot.task.TaskList;
@@ -348,12 +350,9 @@ public class MattChatBot {
         // Every caller checks for the empty case first and shows its own
         // wording for it, so a heading with nothing under it is a mistake.
         assert !shown.isEmpty() : "the empty case is reported by the caller, not numbered";
-        String[] lines = new String[shown.size() + 1];
-        lines[0] = heading;
-        for (int i = 0; i < shown.size(); i++) {
-            lines[i + 1] = (i + 1) + "." + shown.get(i);
-        }
-        return lines;
+        Stream<String> numbered = IntStream.range(0, shown.size())
+                .mapToObj(i -> (i + 1) + "." + shown.get(i));
+        return Stream.concat(Stream.of(heading), numbered).toArray(String[]::new);
     }
 
     /**
