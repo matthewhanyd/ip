@@ -5,6 +5,9 @@ package seedu.mattchatbot.task;
  */
 public class Todo extends Task {
 
+    /** The marker shown in a todo's type box and written to the save file. */
+    public static final String TYPE_ICON = "T";
+
     /**
      * Creates a todo.
      *
@@ -16,6 +19,6 @@ public class Todo extends Task {
 
     @Override
     public String getTypeIcon() {
-        return "T";
+        return TYPE_ICON;
     }
 }

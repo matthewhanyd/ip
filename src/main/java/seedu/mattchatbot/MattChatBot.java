@@ -1,7 +1,6 @@
 package seedu.mattchatbot;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import seedu.mattchatbot.task.Task;
@@ -87,10 +86,7 @@ public class MattChatBot {
      * @return the text of the greeting
      */
     public String getWelcomeMessage() {
-        ui.showWelcome();
-        if (loadWarning != null) {
-            ui.show(loadWarning, "The tasks I could read are still here.");
-        }
+        showGreeting();
         return ui.takeShownText();
     }
 
@@ -133,10 +129,7 @@ public class MattChatBot {
 
     /** Greets the user, handles commands until they say bye, then signs off. */
     public void run() {
-        ui.showWelcome();
-        if (loadWarning != null) {
-            ui.show(loadWarning, "The tasks I could read are still here.");
-        }
+        showGreeting();
         runCommandLoop();
         ui.showGoodbye();
     }
@@ -148,6 +141,20 @@ public class MattChatBot {
      */
     public static void main(String[] args) {
         new MattChatBot(SAVE_FILE).run();
+    }
+
+    /**
+     * Shows the welcome message, followed by any complaint about the save
+     * file, as one block.
+     * <p>
+     * Shared by the console and GUI entry points so that a session starts the
+     * same way whichever one is used.
+     */
+    private void showGreeting() {
+        ui.showWelcome();
+        if (loadWarning != null) {
+            ui.show(loadWarning, "The tasks I could read are still here.");
+        }
     }
 
     /**
@@ -268,28 +275,24 @@ public class MattChatBot {
      */
     private void setDone(int index, boolean isDone) throws MattChatBotException {
         Task task = tasks.get(index);
+        String confirmation;
         if (isDone) {
             task.markAsDone();
+            confirmation = "Nice! I've marked this task as done:";
         } else {
             task.markAsNotDone();
+            confirmation = "OK, I've marked this task as not done yet:";
         }
         storage.save(tasks);
-        if (isDone) {
-            ui.show("Nice! I've marked this task as done:", "  " + task);
-        } else {
-            ui.show("OK, I've marked this task as not done yet:", "  " + task);
-        }
+        ui.show(confirmation, "  " + task);
     }
 
     /** Prints every stored task, numbered from 1, with its type and status. */
     private void listTasks() {
-        if (tasks.isEmpty()) {
-            ui.show("Your list is empty. Add something with "
-                    + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
-                    + " or " + Command.EVENT.getKeyword() + ".");
-            return;
-        }
-        ui.show(numbered("Here are the tasks in your list:", tasks.asList()));
+        showTasks(tasks.asList(), "Here are the tasks in your list:",
+                "Your list is empty. Add something with "
+                        + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
+                        + " or " + Command.EVENT.getKeyword() + ".");
     }
 
     /**
@@ -298,13 +301,10 @@ public class MattChatBot {
      * @param date the date to report on
      */
     private void listTasksOn(LocalDate date) {
-        String shownDate = date.format(DateTimeFormatter.ofPattern("MMM dd yyyy"));
-        ArrayList<Task> matches = tasks.getTasksOn(date);
-        if (matches.isEmpty()) {
-            ui.show("Nothing on " + shownDate + ".");
-            return;
-        }
-        ui.show(numbered("Here is what you have on " + shownDate + ":", matches));
+        String shownDate = DateTimes.format(date);
+        showTasks(tasks.getTasksOn(date),
+                "Here is what you have on " + shownDate + ":",
+                "Nothing on " + shownDate + ".");
     }
 
     /**
@@ -313,12 +313,28 @@ public class MattChatBot {
      * @param keyword the text the user is looking for
      */
     private void listMatchingTasks(String keyword) {
-        ArrayList<Task> matches = tasks.getTasksMatching(keyword);
-        if (matches.isEmpty()) {
-            ui.show("No tasks match \"" + keyword + "\".");
+        showTasks(tasks.getTasksMatching(keyword),
+                "Here are the matching tasks in your list:",
+                "No tasks match \"" + keyword + "\".");
+    }
+
+    /**
+     * Shows a set of tasks, or says why there are none to show.
+     * <p>
+     * Every command that lists tasks needs the same two cases, and only the
+     * wording differs, so each caller supplies its own wording and leaves the
+     * shape of the reply here.
+     *
+     * @param shown        the tasks to list
+     * @param heading      the line above them when there are some
+     * @param emptyMessage what to say instead when there are none
+     */
+    private void showTasks(ArrayList<Task> shown, String heading, String emptyMessage) {
+        if (shown.isEmpty()) {
+            ui.show(emptyMessage);
             return;
         }
-        ui.show(numbered("Here are the matching tasks in your list:", matches));
+        ui.show(numbered(heading, shown));
     }
 
     /**

@@ -107,6 +107,16 @@ public class DateTimes {
     }
 
     /**
+     * Formats a plain date for display, e.g. {@code Oct 15 2019}.
+     *
+     * @param date the date to format
+     * @return the text to show the user
+     */
+    public static String format(LocalDate date) {
+        return date.format(DISPLAY_DATE);
+    }
+
+    /**
      * Formats a moment for the save file.
      *
      * @param when the moment to format

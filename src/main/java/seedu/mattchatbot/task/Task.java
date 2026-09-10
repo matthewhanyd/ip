@@ -12,6 +12,14 @@ import java.time.LocalDate;
  */
 public abstract class Task {
 
+    /**
+     * What goes between two fields of a task in the save file.
+     * <p>
+     * Declared here, next to the encoding it belongs to, because every task
+     * type appends its own fields with it and Storage reads them back.
+     */
+    public static final String FIELD_SEPARATOR = " | ";
+
     /** What the user asked to be reminded of. */
     protected String description;
 
@@ -93,7 +101,8 @@ public abstract class Task {
      * @return the line to write to the save file
      */
     public String toFileFormat() {
-        return getTypeIcon() + " | " + (isDone ? "1" : "0") + " | " + description;
+        return getTypeIcon() + FIELD_SEPARATOR + (isDone ? "1" : "0")
+                + FIELD_SEPARATOR + description;
     }
 
     /**

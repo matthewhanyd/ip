@@ -3,6 +3,7 @@ package seedu.mattchatbot.task;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Predicate;
 
 import seedu.mattchatbot.Command;
 import seedu.mattchatbot.MattChatBotException;
@@ -86,13 +87,7 @@ public class TaskList {
      * @return the matching tasks, in list order
      */
     public ArrayList<Task> getTasksOn(LocalDate date) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.isOn(date)) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        return findTasks(task -> task.isOn(date));
     }
 
     /**
@@ -103,10 +98,24 @@ public class TaskList {
      * @return the matching tasks, in list order
      */
     public ArrayList<Task> getTasksMatching(String keyword) {
-        ArrayList<Task> matches = new ArrayList<>();
         String wanted = keyword.toLowerCase();
+        return findTasks(task -> task.getDescription().toLowerCase().contains(wanted));
+    }
+
+    /**
+     * Returns the tasks the given test accepts, in list order.
+     * <p>
+     * Holds the one thing every search has in common -- walk the list, keep
+     * what matches -- so that each search method is left saying only what it
+     * counts as a match.
+     *
+     * @param isWanted decides whether a task belongs in the result
+     * @return the matching tasks, in list order
+     */
+    private ArrayList<Task> findTasks(Predicate<Task> isWanted) {
+        ArrayList<Task> matches = new ArrayList<>();
         for (Task task : tasks) {
-            if (task.getDescription().toLowerCase().contains(wanted)) {
+            if (isWanted.test(task)) {
                 matches.add(task);
             }
         }

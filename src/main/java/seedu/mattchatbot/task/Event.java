@@ -11,6 +11,9 @@ import seedu.mattchatbot.DateTimes;
  */
 public class Event extends Task {
 
+    /** The marker shown in an event's type box and written to the save file. */
+    public static final String TYPE_ICON = "E";
+
     /** When the event starts. */
     protected LocalDateTime from;
 
@@ -32,7 +35,7 @@ public class Event extends Task {
 
     @Override
     public String getTypeIcon() {
-        return "E";
+        return TYPE_ICON;
     }
 
     /**
@@ -50,8 +53,8 @@ public class Event extends Task {
 
     @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + DateTimes.toFileString(from)
-                + " | " + DateTimes.toFileString(to);
+        return super.toFileFormat() + FIELD_SEPARATOR + DateTimes.toFileString(from)
+                + FIELD_SEPARATOR + DateTimes.toFileString(to);
     }
 
     @Override
