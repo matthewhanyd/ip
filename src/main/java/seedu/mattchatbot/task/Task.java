@@ -2,6 +2,8 @@ package seedu.mattchatbot.task;
 
 import java.time.LocalDate;
 
+import seedu.mattchatbot.MattChatBotException;
+
 /**
  * A single item in the user's list, together with whether it has been done.
  * <p>
@@ -49,6 +51,52 @@ public abstract class Task {
      * @return the one-character type marker
      */
     public abstract String getTypeIcon();
+
+    /**
+     * Returns what this kind of task is called, e.g. {@code deadline}, for use
+     * in messages written to the user.
+     *
+     * @return the type's name in lower case
+     */
+    public abstract String getTypeName();
+
+    /**
+     * Applies an update to this task, rejecting parts it does not have.
+     * <p>
+     * A plain task has only a description, so this base version turns down
+     * every date. The types that carry dates override it to accept their own
+     * and turn down the rest. Asking the task itself keeps the rules about
+     * which markers suit which type with the type, rather than in an
+     * instanceof check somewhere else that would grow with every new type.
+     * <p>
+     * Every override rejects before it changes anything, so a refused update
+     * leaves the task exactly as it was.
+     *
+     * @param update the parts to change
+     * @throws MattChatBotException if the update names a part this task lacks
+     */
+    public void applyUpdate(TaskUpdate update) throws MattChatBotException {
+        if (update.hasBy()) {
+            throw new MattChatBotException("A " + getTypeName()
+                    + " has no due date, so there is no /by to change.");
+        }
+        if (update.hasFrom() || update.hasTo()) {
+            throw new MattChatBotException("A " + getTypeName()
+                    + " has no start or end time, so there is no /from or /to to change.");
+        }
+        applyDescription(update);
+    }
+
+    /**
+     * Applies the update's description, if it gave one.
+     *
+     * @param update the parts to change
+     */
+    protected void applyDescription(TaskUpdate update) {
+        if (update.hasDescription()) {
+            description = update.description();
+        }
+    }
 
     /**
      * Returns the single character shown inside the status box.

@@ -41,6 +41,9 @@ public enum Command {
     /** Removes a task from the list. */
     DELETE("delete"),
 
+    /** Changes parts of a task that is already in the list. */
+    UPDATE("update"),
+
     /** Ends the session. */
     BYE("bye");
 

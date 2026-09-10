@@ -21,4 +21,9 @@ public class Todo extends Task {
     public String getTypeIcon() {
         return TYPE_ICON;
     }
+
+    @Override
+    public String getTypeName() {
+        return "todo";
+    }
 }
