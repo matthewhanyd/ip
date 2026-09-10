@@ -61,6 +61,10 @@ public class Storage {
         for (Task task : tasks.asList()) {
             contents.append(task.toFileFormat()).append(System.lineSeparator());
         }
+        // createDirectories cannot be given null, which is what getParent
+        // returns for a bare file name such as "tasks.txt". Every save path in
+        // use names a folder, and this records that the code counts on it.
+        assert filePath.getParent() != null : "the save file always sits inside a folder";
         try {
             // The folder may not exist yet, e.g. on a fresh copy of the project.
             Files.createDirectories(filePath.getParent());
@@ -138,6 +142,9 @@ public class Storage {
                     DateTimes.parse(fields[4]));
             default -> throw new MattChatBotException("Unknown task type: " + type);
         };
+        // The switch above throws on any unknown type, so every path that
+        // reaches here has built a task rather than fallen through.
+        assert task != null : "an unrecognised type throws rather than yielding null";
         if (fields[1].equals("1")) {
             task.markAsDone();
         } else if (!fields[1].equals("0")) {

@@ -107,6 +107,10 @@ public class Ui {
      * @return true if another command can be read
      */
     public boolean hasNextCommand() {
+        // Only the console mode has a scanner, so reaching here in capturing
+        // mode would mean a GUI had started reading standard input behind the
+        // user's back rather than feeding input in through getResponse.
+        assert scanner != null : "hasNextCommand is for console mode; a GUI never reads stdin";
         return scanner.hasNextLine();
     }
 
@@ -116,6 +120,7 @@ public class Ui {
      * @return what the user typed
      */
     public String readCommand() {
+        assert scanner != null : "readCommand is for console mode; a GUI never reads stdin";
         return scanner.nextLine().trim();
     }
 
@@ -167,6 +172,9 @@ public class Ui {
      * @param lines the lines making up one reply
      */
     public void show(String... lines) {
+        // A call with no lines would print a pair of dividers with nothing
+        // between them, which is never something the chatbot means to say.
+        assert lines.length > 0 : "every reply has at least one line";
         if (captured != null) {
             for (String line : lines) {
                 captured.append(line).append(System.lineSeparator());

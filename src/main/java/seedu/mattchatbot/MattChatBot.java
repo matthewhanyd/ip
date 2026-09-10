@@ -184,6 +184,10 @@ public class MattChatBot {
      * @throws MattChatBotException if the command cannot be carried out
      */
     private boolean handleCommand(String input) throws MattChatBotException {
+        // Both callers drop blank input before getting here, so a blank line
+        // reaching this point would mean one of those guards had been lost.
+        // Parser would then read a command word that is not there.
+        assert !input.isBlank() : "blank input is filtered out before dispatch";
         Command command = Parser.parseCommand(input);
         String argument = Parser.parseArgument(input);
 
@@ -235,6 +239,9 @@ public class MattChatBot {
      * @throws MattChatBotException if the updated list cannot be saved
      */
     private void addTask(Task task) throws MattChatBotException {
+        // Parser either returns a task or throws, so null here would mean a
+        // parse method had gained a silent failure path.
+        assert task != null : "Parser returns a task or throws";
         tasks.add(task);
         storage.save(tasks);
         ui.show("Got it. I've added this task:", "  " + task, countSummary());
@@ -322,6 +329,9 @@ public class MattChatBot {
      * @return the lines to print
      */
     private static String[] numbered(String heading, ArrayList<Task> shown) {
+        // Every caller checks for the empty case first and shows its own
+        // wording for it, so a heading with nothing under it is a mistake.
+        assert !shown.isEmpty() : "the empty case is reported by the caller, not numbered";
         String[] lines = new String[shown.size() + 1];
         lines[0] = heading;
         for (int i = 0; i < shown.size(); i++) {

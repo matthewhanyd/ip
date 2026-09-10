@@ -67,6 +67,9 @@ public class MainWindow {
      */
     @FXML
     private void handleUserInput() {
+        // FXML wires this handler up before setChatBot is called, so an
+        // unusually quick first click would otherwise fail with a bare NPE.
+        assert chatBot != null : "setChatBot runs before the window handles input";
         String input = userInput.getText();
         if (input.isBlank()) {
             return;

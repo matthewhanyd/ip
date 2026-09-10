@@ -79,5 +79,9 @@ shadowJar {
 
 run {
     standardInput = System.in
+    // Assertions are stripped by the JVM unless it is started with -ea, so an
+    // assertion that fails would otherwise go unnoticed when running the app.
+    // (The `test` task turns them on by default, so it needs no such line.)
+    enableAssertions = true
 }
 

@@ -24,6 +24,10 @@ public abstract class Task {
      * @param description what the user typed
      */
     public Task(String description) {
+        // Parser rejects an empty description and Storage rejects a blank one
+        // in the save file, so a task with nothing to show should be
+        // impossible to build; it would display as an empty "[T][ ] " line.
+        assert description != null && !description.isBlank() : "a task always has a description";
         this.description = description;
         this.isDone = false;
     }
