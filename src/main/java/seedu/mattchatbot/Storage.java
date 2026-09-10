@@ -82,6 +82,10 @@ public class Storage {
         for (Task task : tasks.asList()) {
             contents.append(task.toFileFormat()).append(System.lineSeparator());
         }
+        // createDirectories cannot be given null, which is what getParent
+        // returns for a bare file name such as "tasks.txt". Every save path in
+        // use names a folder, and this records that the code counts on it.
+        assert filePath.getParent() != null : "the save file always sits inside a folder";
         try {
             // The folder may not exist yet, e.g. on a fresh copy of the project.
             Files.createDirectories(filePath.getParent());
@@ -139,6 +143,9 @@ public class Storage {
         String type = fields.length > 0 ? fields[TYPE_FIELD] : "";
         checkFieldCount(type, fields.length);
         Task task = createTask(type, fields);
+        // createTask throws on an unrecognised type rather than falling
+        // through, so there is always a task here to apply the flag to.
+        assert task != null : "an unrecognised type throws rather than yielding null";
         applyStatus(task, fields[STATUS_FIELD]);
         return task;
     }

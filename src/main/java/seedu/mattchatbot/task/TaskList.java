@@ -44,7 +44,12 @@ public class TaskList {
      * @param tasksToAdd the tasks to add
      */
     public void add(Task... tasksToAdd) {
+        int sizeBefore = tasks.size();
         Collections.addAll(tasks, tasksToAdd);
+        // Varargs makes it easy to add nothing by accident, e.g. by spreading
+        // an empty array, so this states that a call is meant to add tasks
+        // and that every one given is kept.
+        assert tasks.size() == sizeBefore + tasksToAdd.length : "add keeps every task given";
     }
 
     /**
@@ -56,6 +61,9 @@ public class TaskList {
      */
     public Task remove(int index) throws MattChatBotException {
         checkInRange(index);
+        // checkInRange is the only guard between the user's task number and
+        // ArrayList, so this records what it is relied on to have ruled out.
+        assert index >= 0 && index < tasks.size() : "checkInRange rejects out-of-range indexes";
         return tasks.remove(index);
     }
 
@@ -68,6 +76,7 @@ public class TaskList {
      */
     public Task get(int index) throws MattChatBotException {
         checkInRange(index);
+        assert index >= 0 && index < tasks.size() : "checkInRange rejects out-of-range indexes";
         return tasks.get(index);
     }
 

@@ -61,7 +61,11 @@ public class Parser {
      * @return one or two parts: the command word, then the remainder
      */
     private static String[] splitOffCommandWord(String input) {
-        return input.split("\\s+", 2);
+        String[] parts = input.split("\\s+", 2);
+        // parseCommand reads parts[0] without checking, which is safe only
+        // because split always yields at least one part for a non-blank input.
+        assert parts.length >= 1 : "splitting a non-blank line always yields a command word";
+        return parts;
     }
 
     /**
