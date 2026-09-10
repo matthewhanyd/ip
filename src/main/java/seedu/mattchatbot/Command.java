@@ -1,5 +1,8 @@
 package seedu.mattchatbot;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * The commands the chatbot understands, each paired with the keyword the user
  * types to invoke it.
@@ -70,13 +73,11 @@ public enum Command {
      * @throws MattChatBotException if no command uses that keyword
      */
     public static Command fromKeyword(String word) throws MattChatBotException {
-        for (Command command : values()) {
-            if (command.keyword.equalsIgnoreCase(word)) {
-                return command;
-            }
-        }
-        throw new MattChatBotException("I don't know what \"" + word.toLowerCase()
-                + "\" means. I understand: " + listKeywords());
+        return Arrays.stream(values())
+                .filter(command -> command.keyword.equalsIgnoreCase(word))
+                .findFirst()
+                .orElseThrow(() -> new MattChatBotException("I don't know what \""
+                        + word.toLowerCase() + "\" means. I understand: " + listKeywords()));
     }
 
     /**
@@ -88,16 +89,12 @@ public enum Command {
      * @return the keywords in declaration order, separated by ", "
      */
     public static String listKeywords() {
-        StringBuilder keywords = new StringBuilder();
-        for (Command command : values()) {
-            if (!keywords.isEmpty()) {
-                keywords.append(", ");
-            }
-            keywords.append(command.keyword);
-        }
+        String keywords = Arrays.stream(values())
+                .map(Command::getKeyword)
+                .collect(Collectors.joining(", "));
         // Used inside "I understand: ..." messages, which would read as a
         // dangling sentence if the enum ever had no constants left.
         assert !keywords.isEmpty() : "the chatbot always understands at least one command";
-        return keywords.toString();
+        return keywords;
     }
 }

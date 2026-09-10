@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import seedu.mattchatbot.task.Deadline;
 import seedu.mattchatbot.task.Event;
@@ -78,10 +79,12 @@ public class Storage {
      * @throws MattChatBotException if the file cannot be written
      */
     public void save(TaskList tasks) throws MattChatBotException {
-        StringBuilder contents = new StringBuilder();
-        for (Task task : tasks.asList()) {
-            contents.append(task.toFileFormat()).append(System.lineSeparator());
-        }
+        // Each line carries its own terminator rather than joining on one, so
+        // that the file ends with a newline and an empty list writes nothing,
+        // which is exactly what the previous loop produced.
+        String contents = tasks.asList().stream()
+                .map(task -> task.toFileFormat() + System.lineSeparator())
+                .collect(Collectors.joining());
         // createDirectories cannot be given null, which is what getParent
         // returns for a bare file name such as "tasks.txt". Every save path in
         // use names a folder, and this records that the code counts on it.
@@ -89,7 +92,7 @@ public class Storage {
         try {
             // The folder may not exist yet, e.g. on a fresh copy of the project.
             Files.createDirectories(filePath.getParent());
-            Files.writeString(filePath, contents.toString());
+            Files.writeString(filePath, contents);
         } catch (IOException e) {
             throw new MattChatBotException(
                     "I couldn't save your tasks to " + filePath + ".");

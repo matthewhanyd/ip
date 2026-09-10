@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import seedu.mattchatbot.Command;
 import seedu.mattchatbot.MattChatBotException;
@@ -113,13 +114,9 @@ public class TaskList {
      * @return the matching tasks, in list order
      */
     private ArrayList<Task> findTasks(Predicate<Task> isWanted) {
-        ArrayList<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (isWanted.test(task)) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        return tasks.stream()
+                .filter(isWanted)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
