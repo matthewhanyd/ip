@@ -78,11 +78,11 @@ public abstract class Task {
     public void applyUpdate(TaskUpdate update) throws MattChatBotException {
         if (update.hasBy()) {
             throw new MattChatBotException("A " + getTypeName()
-                    + " has no due date, so there is no /by to change.");
+                    + " has no due date, so there is no /by to amend.");
         }
         if (update.hasFrom() || update.hasTo()) {
             throw new MattChatBotException("A " + getTypeName()
-                    + " has no start or end time, so there is no /from or /to to change.");
+                    + " has no start or end time, so there is no /from or /to to amend.");
         }
         applyDescription(update);
     }

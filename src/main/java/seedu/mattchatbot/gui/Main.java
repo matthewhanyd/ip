@@ -39,7 +39,7 @@ public class Main extends Application {
             scene.getStylesheets().add(Main.class.getResource("/view/main.css").toExternalForm());
 
             stage.setScene(scene);
-            stage.setTitle("MattChatBot");
+            stage.setTitle("Winston");
             stage.setMinWidth(360);
             stage.setMinHeight(480);
 

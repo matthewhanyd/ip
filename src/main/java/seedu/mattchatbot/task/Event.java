@@ -55,7 +55,7 @@ public class Event extends Task {
     public void applyUpdate(TaskUpdate update) throws MattChatBotException {
         if (update.hasBy()) {
             throw new MattChatBotException("An event has no /by. "
-                    + "Use /from and /to to change when it runs.");
+                    + "Use /from and /to to amend when it runs.");
         }
         applyDescription(update);
         if (update.hasFrom()) {

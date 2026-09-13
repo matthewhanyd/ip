@@ -79,8 +79,8 @@ public enum Command {
         return Arrays.stream(values())
                 .filter(command -> command.keyword.equalsIgnoreCase(word))
                 .findFirst()
-                .orElseThrow(() -> new MattChatBotException("I don't know what \""
-                        + word.toLowerCase() + "\" means. I understand: " + listKeywords()));
+                .orElseThrow(() -> new MattChatBotException("I regret I did not follow \""
+                        + word.toLowerCase() + "\". I understand: " + listKeywords()));
     }
 
     /**

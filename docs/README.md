@@ -1,4 +1,4 @@
-# MattChatBot User Guide
+# Winston User Guide
 
 // Product screenshot goes here
 

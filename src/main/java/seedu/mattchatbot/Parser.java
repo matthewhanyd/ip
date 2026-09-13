@@ -89,7 +89,7 @@ public class Parser {
      */
     public static Todo parseTodo(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
-            throw new MattChatBotException("A todo needs a description. Try: "
+            throw new MattChatBotException("A todo wants a description. Perhaps: "
                     + Command.TODO.getKeyword() + " borrow book");
         }
         return new Todo(argument);
@@ -103,22 +103,22 @@ public class Parser {
      * @throws MattChatBotException if a part is missing or the date is not understood
      */
     public static Deadline parseDeadline(String argument) throws MattChatBotException {
-        String example = "Try: " + Command.DEADLINE.getKeyword()
+        String example = "Perhaps: " + Command.DEADLINE.getKeyword()
                 + " return book /by 2019-10-15";
         int byAt = argument.indexOf(KEYWORD_BY);
         if (byAt < 0) {
             throw new MattChatBotException(
-                    "A deadline needs a /by, so I know when it is due. " + example);
+                    "A deadline wants a /by, so I know when it falls due. " + example);
         }
         String description = argument.substring(0, byAt).trim();
         String by = argument.substring(byAt + KEYWORD_BY.length()).trim();
         if (description.isEmpty()) {
             throw new MattChatBotException(
-                    "A deadline needs a description before the /by. " + example);
+                    "A deadline wants a description before the /by. " + example);
         }
         if (by.isEmpty()) {
             throw new MattChatBotException(
-                    "A deadline needs a date or time after the /by. " + example);
+                    "A deadline wants a date or time after the /by. " + example);
         }
         return new Deadline(description, DateTimes.parse(by));
     }
@@ -132,34 +132,34 @@ public class Parser {
      * @throws MattChatBotException if a part is missing or a date is not understood
      */
     public static Event parseEvent(String argument) throws MattChatBotException {
-        String example = "Try: " + Command.EVENT.getKeyword()
+        String example = "Perhaps: " + Command.EVENT.getKeyword()
                 + " project meeting /from 2019-10-15 1400 /to 2019-10-15 1600";
         int fromAt = argument.indexOf(KEYWORD_FROM);
         if (fromAt < 0) {
             throw new MattChatBotException(
-                    "An event needs a /from, so I know when it starts. " + example);
+                    "An event wants a /from, so I know when it begins. " + example);
         }
         // Look for /to only after /from, so that a description mentioning "/to"
         // does not get mistaken for the end time.
         int toAt = argument.indexOf(KEYWORD_TO, fromAt + KEYWORD_FROM.length());
         if (toAt < 0) {
             throw new MattChatBotException(
-                    "An event needs a /to, so I know when it ends. " + example);
+                    "An event wants a /to, so I know when it concludes. " + example);
         }
         String description = argument.substring(0, fromAt).trim();
         String from = argument.substring(fromAt + KEYWORD_FROM.length(), toAt).trim();
         String to = argument.substring(toAt + KEYWORD_TO.length()).trim();
         if (description.isEmpty()) {
             throw new MattChatBotException(
-                    "An event needs a description before the /from. " + example);
+                    "An event wants a description before the /from. " + example);
         }
         if (from.isEmpty()) {
             throw new MattChatBotException(
-                    "An event needs a start time after the /from. " + example);
+                    "An event wants a start time after the /from. " + example);
         }
         if (to.isEmpty()) {
             throw new MattChatBotException(
-                    "An event needs an end time after the /to. " + example);
+                    "An event wants an end time after the /to. " + example);
         }
         return new Event(description, DateTimes.parse(from), DateTimes.parse(to));
     }
@@ -179,14 +179,14 @@ public class Parser {
             throws MattChatBotException {
         String keyword = command.getKeyword();
         if (argument.isEmpty()) {
-            throw new MattChatBotException("Which task should I " + keyword
-                    + "? Try: " + keyword + " 2");
+            throw new MattChatBotException("Which entry shall I " + keyword
+                    + "? Perhaps: " + keyword + " 2");
         }
         try {
             return Integer.parseInt(argument) - 1;
         } catch (NumberFormatException e) {
             throw new MattChatBotException("\"" + argument
-                    + "\" is not a task number. Try: " + keyword + " 2");
+                    + "\" is not a number I recognise. Perhaps: " + keyword + " 2");
         }
     }
 
@@ -199,7 +199,7 @@ public class Parser {
      */
     public static String parseKeyword(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
-            throw new MattChatBotException("What should I look for? Try: "
+            throw new MattChatBotException("What shall I look for? Perhaps: "
                     + Command.FIND.getKeyword() + " book");
         }
         return argument;
@@ -215,8 +215,8 @@ public class Parser {
     public static int parseUpdateTarget(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
             String keyword = Command.UPDATE.getKeyword();
-            throw new MattChatBotException("Which task should I " + keyword
-                    + "? Try: " + keyword + " 2 new description");
+            throw new MattChatBotException("Which entry shall I " + keyword
+                    + "? Perhaps: " + keyword + " 2 new description");
         }
         return parseTaskNumber(splitOffCommandWord(argument)[0], Command.UPDATE);
     }
@@ -244,7 +244,7 @@ public class Parser {
                 parseMarkerValue(changes, KEYWORD_TO));
         if (update.isEmpty()) {
             String keyword = Command.UPDATE.getKeyword();
-            throw new MattChatBotException("Tell me what to change. Try: " + keyword
+            throw new MattChatBotException("You have not said what to change. Perhaps: " + keyword
                     + " 2 new description, or " + keyword + " 2 /by 2019-12-01");
         }
         return update;
@@ -285,7 +285,7 @@ public class Parser {
                 ? changes.substring(valueStart)
                 : changes.substring(valueStart, nextMarker);
         if (value.isBlank()) {
-            throw new MattChatBotException("The " + marker + " needs a date after it. Try: "
+            throw new MattChatBotException("The " + marker + " wants a date after it. Perhaps: "
                     + Command.UPDATE.getKeyword() + " 2 " + marker + " 2019-12-01");
         }
         return DateTimes.parse(value);
@@ -311,7 +311,7 @@ public class Parser {
      */
     public static LocalDate parseOnDate(String argument) throws MattChatBotException {
         if (argument.isEmpty()) {
-            throw new MattChatBotException("Which date? Try: "
+            throw new MattChatBotException("Which date, may I ask? Perhaps: "
                     + Command.ON.getKeyword() + " 2019-10-15");
         }
         return DateTimes.parseDate(argument);

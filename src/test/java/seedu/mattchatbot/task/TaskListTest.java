@@ -59,14 +59,14 @@ public class TaskListTest {
     public void get_emptyList_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 new TaskList().get(0));
-        assertEquals("Your list is empty, so there is no task 1 yet.", e.getMessage());
+        assertEquals("Your list is empty, so there is no entry 1 yet.", e.getMessage());
     }
 
     @Test
     public void get_indexPastEnd_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 listOfThree().get(3));
-        assertEquals("You have 3 tasks, so there is no task 4. Type list to see them.",
+        assertEquals("You have 3 entries, so there is no entry 4. Type list to review them.",
                 e.getMessage());
     }
 
@@ -174,10 +174,10 @@ public class TaskListTest {
     @Test
     public void describeSize_variousCounts_correctPlural() {
         TaskList tasks = new TaskList();
-        assertEquals("0 tasks", tasks.describeSize());
+        assertEquals("0 entries", tasks.describeSize());
         tasks.add(new Todo("one"));
-        assertEquals("1 task", tasks.describeSize());
+        assertEquals("1 entry", tasks.describeSize());
         tasks.add(new Todo("two"));
-        assertEquals("2 tasks", tasks.describeSize());
+        assertEquals("2 entries", tasks.describeSize());
     }
 }

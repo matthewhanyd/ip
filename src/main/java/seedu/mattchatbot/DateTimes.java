@@ -70,9 +70,9 @@ public class DateTimes {
             try {
                 return LocalDate.parse(trimmed, INPUT_DATE).atStartOfDay();
             } catch (DateTimeParseException notADate) {
-                throw new MattChatBotException("I don't understand the date \""
-                        + trimmed + "\". Write it as yyyy-MM-dd, e.g. 2019-10-15,"
-                        + " optionally with a time, e.g. 2019-10-15 1800.");
+                throw new MattChatBotException("I could not make sense of the date \""
+                        + trimmed + "\". It should be written as yyyy-MM-dd, e.g. 2019-10-15,"
+                        + " with a time if you wish, e.g. 2019-10-15 1800.");
             }
         }
     }
