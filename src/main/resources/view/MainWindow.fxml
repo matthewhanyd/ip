@@ -18,9 +18,9 @@
         <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
                     styleClass="conversation-scroll">
           <content>
-            <VBox fx:id="dialogContainer" spacing="12.0" styleClass="conversation">
+            <VBox fx:id="dialogContainer" spacing="10.0" styleClass="conversation">
               <padding>
-                <Insets bottom="16.0" left="16.0" right="16.0" top="16.0"/>
+                <Insets bottom="14.0" left="12.0" right="12.0" top="14.0"/>
               </padding>
             </VBox>
           </content>
