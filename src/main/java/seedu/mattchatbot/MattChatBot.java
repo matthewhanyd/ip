@@ -86,11 +86,11 @@ public class MattChatBot {
      * Returns the greeting a GUI should show before the user types anything,
      * including any complaint about the save file.
      *
-     * @return the text of the greeting
+     * @return the greeting, marked as a complaint if the save file was unusable
      */
-    public String getWelcomeMessage() {
+    public Reply getWelcomeMessage() {
         showGreeting();
-        return ui.takeShownText();
+        return new Reply(ui.takeShownText(), loadWarning != null);
     }
 
     /**
@@ -102,13 +102,17 @@ public class MattChatBot {
      * conversation.
      *
      * @param input one line as the user typed it
-     * @return the reply, or an empty string if the input was blank
+     * @return the reply, empty if the input was blank, marked as a complaint
+     *         if the command could not be carried out
      */
-    public String getResponse(String input) {
+    public Reply getResponse(String input) {
         String command = input.trim();
         if (command.isEmpty()) {
-            return "";
+            return new Reply("", false);
         }
+        // Whether this turn went wrong is known here and nowhere else, so it
+        // is recorded now rather than left for the GUI to infer from wording.
+        boolean isError = false;
         try {
             isExit = handleCommand(command);
             if (isExit) {
@@ -116,8 +120,9 @@ public class MattChatBot {
             }
         } catch (MattChatBotException e) {
             ui.showError(e.getMessage());
+            isError = true;
         }
-        return ui.takeShownText();
+        return new Reply(ui.takeShownText(), isError);
     }
 
     /**

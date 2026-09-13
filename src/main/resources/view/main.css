@@ -1,10 +1,15 @@
 /*
  * Look and feel of the chatbot window. Kept out of the FXML so that the
  * layout files stay about structure and this file stays about appearance.
+ *
+ * The two speakers are styled deliberately unlike each other. The user's
+ * input is short, so it gets a compact bubble. The chatbot's replies are the
+ * content the window exists to show, so they are set as plain full-width text
+ * with nothing drawn around them to eat into the space.
  */
 
 .root-pane {
-    -fx-background-color: #f3f5f4;
+    -fx-background-color: #f5f7f6;
 }
 
 /* The scroll pane and its viewport both paint a background, so both are
@@ -20,42 +25,64 @@
 }
 
 .conversation {
-    -fx-background-color: #f3f5f4;
+    -fx-background-color: transparent;
 }
 
 .dialog-text {
-    -fx-background-radius: 14px;
-    -fx-padding: 10px 14px;
-    -fx-font-family: "Helvetica Neue", "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
     -fx-line-spacing: 2px;
 }
 
+/*
+ * The user's side: a compact bubble on the right. The corner nearest the
+ * composer is squared off, which points the bubble at where it was typed.
+ */
 .user-dialog .dialog-text {
     -fx-background-color: #2c6a44;
+    -fx-background-radius: 14px 14px 4px 14px;
     -fx-text-fill: white;
+    -fx-padding: 9px 13px;
+    -fx-font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/*
+ * The chatbot's side: no bubble, no avatar, full width.
+ *
+ * Set in a monospaced face because most of what the chatbot says is a task
+ * list, and the [T][ ] status boxes only line up down the page if every
+ * character is the same width. A rule down the left edge marks the reply as
+ * the chatbot's without boxing it in.
+ *
+ * "Monospaced" is one of JavaFX's logical families, so it resolves to a real
+ * fixed-width font on every platform. Naming actual fonts here does not work:
+ * JavaFX substitutes the proportional System font for a family it cannot find
+ * rather than moving on to the next name, so a list starting with a font that
+ * is missing silently loses the alignment this is here for.
+ */
+.bot-dialog .dialog-text,
+.error-dialog .dialog-text {
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12.5px;
+    -fx-border-width: 0 0 0 3px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
 }
 
 .bot-dialog .dialog-text {
-    -fx-background-color: white;
     -fx-text-fill: #1d2320;
-    -fx-border-color: #dde3de;
-    -fx-border-radius: 14px;
+    -fx-border-color: transparent transparent transparent #cbd5ce;
+    -fx-padding: 1px 0 1px 11px;
 }
 
-.avatar {
-    -fx-background-radius: 18px;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-}
-
-.user-dialog .avatar {
-    -fx-background-color: #2c6a44;
-}
-
-.bot-dialog .avatar {
-    -fx-background-color: #5c6560;
+/*
+ * A complaint. Marked three ways at once -- tinted panel, red rule, red text
+ * -- so that it is still obvious to a reader who cannot pick out the colour.
+ */
+.error-dialog .dialog-text {
+    -fx-text-fill: #8a1f1f;
+    -fx-background-color: #fcf1f0;
+    -fx-border-color: transparent transparent transparent #c0392b;
+    -fx-padding: 8px 10px 8px 11px;
 }
 
 .composer {
@@ -70,12 +97,20 @@
     -fx-font-size: 13px;
 }
 
+.composer .text-field:focused {
+    -fx-background-color: white;
+    -fx-border-color: #2c6a44;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+}
+
 .composer .button {
     -fx-background-radius: 18px;
     -fx-background-color: #2c6a44;
     -fx-text-fill: white;
     -fx-font-size: 13px;
     -fx-padding: 8px 18px;
+    -fx-cursor: hand;
 }
 
 .composer .button:hover {

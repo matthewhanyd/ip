@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import seedu.mattchatbot.MattChatBot;
+import seedu.mattchatbot.Reply;
 
 /**
  * Controller for the chatbot's window: takes what the user types, asks the
@@ -45,7 +46,13 @@ public class MainWindow {
     /** Keeps the newest message in view as the conversation grows. */
     @FXML
     public void initialize() {
-        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        // Set rather than bind. A bound vvalue cannot be changed by anything
+        // else, including the scroll pane reacting to the user's wheel or
+        // scrollbar, which would leave earlier messages unreachable. Listening
+        // for the container growing scrolls to the bottom when a message
+        // arrives while leaving the user free to scroll back afterwards.
+        dialogContainer.heightProperty().addListener((observable, oldHeight, newHeight) ->
+                scrollPane.setVvalue(1.0));
     }
 
     /**
@@ -55,7 +62,20 @@ public class MainWindow {
      */
     public void setChatBot(MattChatBot chatBot) {
         this.chatBot = chatBot;
-        dialogContainer.getChildren().add(DialogBox.forChatBot(chatBot.getWelcomeMessage()));
+        dialogContainer.getChildren().add(toDialogBox(chatBot.getWelcomeMessage()));
+    }
+
+    /**
+     * Returns the dialog box that suits a reply, so that a complaint is not
+     * shown in the same format as an ordinary answer.
+     *
+     * @param reply what the chatbot said
+     * @return a box styled for an error or for a normal reply
+     */
+    private static DialogBox toDialogBox(Reply reply) {
+        return reply.isError()
+                ? DialogBox.forError(reply.text())
+                : DialogBox.forChatBot(reply.text());
     }
 
     /**
@@ -74,10 +94,10 @@ public class MainWindow {
         if (input.isBlank()) {
             return;
         }
-        String response = chatBot.getResponse(input);
+        Reply reply = chatBot.getResponse(input);
         dialogContainer.getChildren().addAll(
                 DialogBox.forUser(input),
-                DialogBox.forChatBot(response));
+                toDialogBox(reply));
         userInput.clear();
 
         if (chatBot.isExit()) {
