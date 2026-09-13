@@ -25,17 +25,11 @@ public class Ui {
 
     /** ASCII-art banner shown once when the program starts. */
     private static final String BANNER = """
-            M   M   AAA   TTTTT  TTTTT
-            MM MM  A   A    T      T
-            M M M  AAAAA    T      T
-            M   M  A   A    T      T
-            M   M  A   A    T      T
-
-             CCC   H   H   AAA   TTTTT  BBBB    OOO   TTTTT
-            C   C  H   H  A   A    T    B   B  O   O    T
-            C      HHHHH  AAAAA    T    BBBB   O   O    T
-            C   C  H   H  A   A    T    B   B  O   O    T
-             CCC   H   H  A   A    T    BBBB    OOO     T
+            W   W  IIIII  N   N   SSS   TTTTT   OOO   N   N
+            W   W    I    NN  N  S        T    O   O  NN  N
+            W W W    I    N N N   SSS     T    O   O  N N N
+            WW WW    I    N  NN      S    T    O   O  N  NN
+            W   W  IIIII  N   N   SSS     T     OOO   N   N
             """;
 
     /** Where the user's input is read from, or null when capturing for a GUI. */
@@ -131,9 +125,9 @@ public class Ui {
         // The banner is ASCII art, so it only lines up in the console's
         // fixed-width font and is left out of the GUI's greeting.
         if (isCapturing()) {
-            show("Hello! I'm MattChatBot.", "What can I do for you?");
+            show("Good day. Winston, at your service.", "How may I be of assistance?");
         } else {
-            show(BANNER, "Hello! I'm MattChatBot.", "What can I do for you?");
+            show(BANNER, "Good day. Winston, at your service.", "How may I be of assistance?");
         }
     }
 
@@ -141,7 +135,7 @@ public class Ui {
      * Prints the farewell message, the last thing a session prints.
      */
     public void showGoodbye() {
-        show("Bye. Hope to see you again soon!");
+        show("Very good. I shall be here when you return.");
     }
 
     /**

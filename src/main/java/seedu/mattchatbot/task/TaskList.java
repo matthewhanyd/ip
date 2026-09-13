@@ -158,12 +158,12 @@ public class TaskList {
     private void checkInRange(int index) throws MattChatBotException {
         if (tasks.isEmpty()) {
             throw new MattChatBotException(
-                    "Your list is empty, so there is no task " + (index + 1) + " yet.");
+                    "Your list is empty, so there is no entry " + (index + 1) + " yet.");
         }
         if (index < 0 || index >= tasks.size()) {
             throw new MattChatBotException("You have " + describeSize()
-                    + ", so there is no task " + (index + 1) + ". Type "
-                    + Command.LIST.getKeyword() + " to see them.");
+                    + ", so there is no entry " + (index + 1) + ". Type "
+                    + Command.LIST.getKeyword() + " to review them.");
         }
     }
 
@@ -174,6 +174,6 @@ public class TaskList {
      * @return the count and its noun
      */
     public String describeSize() {
-        return tasks.size() + (tasks.size() == 1 ? " task" : " tasks");
+        return tasks.size() + (tasks.size() == 1 ? " entry" : " entries");
     }
 }

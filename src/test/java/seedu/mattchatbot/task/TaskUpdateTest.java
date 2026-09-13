@@ -58,7 +58,7 @@ public class TaskUpdateTest {
         Todo todo = new Todo("read book");
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 todo.applyUpdate(new TaskUpdate("changed", at(2019, 12, 1, 0), null, null)));
-        assertEquals("A todo has no due date, so there is no /by to change.", e.getMessage());
+        assertEquals("A todo has no due date, so there is no /by to amend.", e.getMessage());
         // The description was valid, but a refused update must not apply any
         // part of itself, or the user would be left with a half-changed task.
         assertEquals("[T][ ] read book", todo.toString());
@@ -69,7 +69,7 @@ public class TaskUpdateTest {
         Todo todo = new Todo("read book");
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 todo.applyUpdate(new TaskUpdate("changed", null, at(2019, 12, 1, 0), null)));
-        assertEquals("A todo has no start or end time, so there is no /from or /to to change.",
+        assertEquals("A todo has no start or end time, so there is no /from or /to to amend.",
                 e.getMessage());
         assertEquals("[T][ ] read book", todo.toString());
     }
@@ -79,7 +79,7 @@ public class TaskUpdateTest {
         Deadline deadline = new Deadline("return book", at(2019, 10, 15, 0));
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 deadline.applyUpdate(new TaskUpdate("changed", null, at(2019, 12, 1, 0), null)));
-        assertEquals("A deadline has no start and end times. Use /by to change when it is due.",
+        assertEquals("A deadline has no start and end times. Use /by to amend when it falls due.",
                 e.getMessage());
         assertEquals("[D][ ] return book (by: Oct 15 2019)", deadline.toString());
     }
@@ -89,7 +89,7 @@ public class TaskUpdateTest {
         Event event = new Event("meeting", at(2019, 10, 15, 14), at(2019, 10, 15, 16));
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 event.applyUpdate(new TaskUpdate("changed", at(2019, 12, 1, 0), null, null)));
-        assertEquals("An event has no /by. Use /from and /to to change when it runs.",
+        assertEquals("An event has no /by. Use /from and /to to amend when it runs.",
                 e.getMessage());
         assertEquals("[E][ ] meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)",
                 event.toString());

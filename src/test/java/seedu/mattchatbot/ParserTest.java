@@ -36,7 +36,7 @@ public class ParserTest {
     public void parseCommand_unknownKeyword_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseCommand("blah blah"));
-        assertEquals("I don't know what \"blah\" means. I understand: "
+        assertEquals("I regret I did not follow \"blah\". I understand: "
                 + "todo, deadline, event, list, on, find, mark, unmark, delete, update, bye",
                 e.getMessage());
     }
@@ -60,7 +60,7 @@ public class ParserTest {
     public void parseTodo_emptyDescription_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseTodo(""));
-        assertEquals("A todo needs a description. Try: todo borrow book", e.getMessage());
+        assertEquals("A todo wants a description. Perhaps: todo borrow book", e.getMessage());
     }
 
     @Test
@@ -79,24 +79,24 @@ public class ParserTest {
     public void parseDeadline_missingBy_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseDeadline("return book"));
-        assertEquals("A deadline needs a /by, so I know when it is due. "
-                + "Try: deadline return book /by 2019-10-15", e.getMessage());
+        assertEquals("A deadline wants a /by, so I know when it falls due. "
+                + "Perhaps: deadline return book /by 2019-10-15", e.getMessage());
     }
 
     @Test
     public void parseDeadline_missingDescription_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseDeadline("/by 2019-10-15"));
-        assertEquals("A deadline needs a description before the /by. "
-                + "Try: deadline return book /by 2019-10-15", e.getMessage());
+        assertEquals("A deadline wants a description before the /by. "
+                + "Perhaps: deadline return book /by 2019-10-15", e.getMessage());
     }
 
     @Test
     public void parseDeadline_nothingAfterBy_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseDeadline("return book /by"));
-        assertEquals("A deadline needs a date or time after the /by. "
-                + "Try: deadline return book /by 2019-10-15", e.getMessage());
+        assertEquals("A deadline wants a date or time after the /by. "
+                + "Perhaps: deadline return book /by 2019-10-15", e.getMessage());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class ParserTest {
     public void parseEvent_missingTo_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseEvent("meeting /from 2019-10-15"));
-        assertEquals("An event needs a /to, so I know when it ends. Try: event "
+        assertEquals("An event wants a /to, so I know when it concludes. Perhaps: event "
                 + "project meeting /from 2019-10-15 1400 /to 2019-10-15 1600", e.getMessage());
     }
 
@@ -124,14 +124,14 @@ public class ParserTest {
     public void parseTaskNumber_missingNumber_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseTaskNumber("", Command.MARK));
-        assertEquals("Which task should I mark? Try: mark 2", e.getMessage());
+        assertEquals("Which entry shall I mark? Perhaps: mark 2", e.getMessage());
     }
 
     @Test
     public void parseTaskNumber_notANumber_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseTaskNumber("abc", Command.UNMARK));
-        assertEquals("\"abc\" is not a task number. Try: unmark 2", e.getMessage());
+        assertEquals("\"abc\" is not a number I recognise. Perhaps: unmark 2", e.getMessage());
     }
 
     @Test
@@ -144,7 +144,7 @@ public class ParserTest {
     public void parseKeyword_missingKeyword_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseKeyword(""));
-        assertEquals("What should I look for? Try: find book", e.getMessage());
+        assertEquals("What shall I look for? Perhaps: find book", e.getMessage());
     }
 
     @Test
@@ -157,7 +157,7 @@ public class ParserTest {
     public void parseOnDate_missingDate_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseOnDate(""));
-        assertEquals("Which date? Try: on 2019-10-15", e.getMessage());
+        assertEquals("Which date, may I ask? Perhaps: on 2019-10-15", e.getMessage());
     }
 
     @Test
@@ -170,7 +170,7 @@ public class ParserTest {
     public void parseUpdateTarget_missingNumber_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseUpdateTarget(""));
-        assertEquals("Which task should I update? Try: update 2 new description",
+        assertEquals("Which entry shall I update? Perhaps: update 2 new description",
                 e.getMessage());
     }
 
@@ -178,7 +178,7 @@ public class ParserTest {
     public void parseUpdateTarget_notANumber_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseUpdateTarget("abc something"));
-        assertEquals("\"abc\" is not a task number. Try: update 2", e.getMessage());
+        assertEquals("\"abc\" is not a number I recognise. Perhaps: update 2", e.getMessage());
     }
 
     @Test
@@ -220,7 +220,7 @@ public class ParserTest {
     public void parseUpdateChanges_nothingAsked_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseUpdateChanges("2"));
-        assertEquals("Tell me what to change. Try: update 2 new description, "
+        assertEquals("You have not said what to change. Perhaps: update 2 new description, "
                 + "or update 2 /by 2019-12-01", e.getMessage());
     }
 
@@ -228,7 +228,7 @@ public class ParserTest {
     public void parseUpdateChanges_markerWithoutValue_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 Parser.parseUpdateChanges("2 /by"));
-        assertEquals("The /by needs a date after it. Try: update 2 /by 2019-12-01",
+        assertEquals("The /by wants a date after it. Perhaps: update 2 /by 2019-12-01",
                 e.getMessage());
     }
 

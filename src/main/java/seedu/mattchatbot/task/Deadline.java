@@ -49,7 +49,7 @@ public class Deadline extends Task {
     public void applyUpdate(TaskUpdate update) throws MattChatBotException {
         if (update.hasFrom() || update.hasTo()) {
             throw new MattChatBotException("A deadline has no start and end times. "
-                    + "Use /by to change when it is due.");
+                    + "Use /by to amend when it falls due.");
         }
         applyDescription(update);
         if (update.hasBy()) {

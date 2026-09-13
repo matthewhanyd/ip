@@ -35,8 +35,8 @@ public class DateTimesTest {
     public void parse_freeText_exceptionThrown() {
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 DateTimes.parse("Sunday"));
-        assertEquals("I don't understand the date \"Sunday\". Write it as yyyy-MM-dd, "
-                + "e.g. 2019-10-15, optionally with a time, e.g. 2019-10-15 1800.",
+        assertEquals("I could not make sense of the date \"Sunday\". It should be written as yyyy-MM-dd, "
+                + "e.g. 2019-10-15, with a time if you wish, e.g. 2019-10-15 1800.",
                 e.getMessage());
     }
 

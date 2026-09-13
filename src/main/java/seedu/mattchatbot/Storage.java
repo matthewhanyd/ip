@@ -95,7 +95,7 @@ public class Storage {
             Files.writeString(filePath, contents);
         } catch (IOException e) {
             throw new MattChatBotException(
-                    "I couldn't save your tasks to " + filePath + ".");
+                    "I was unable to save your list to " + filePath + ".");
         }
     }
 
@@ -129,7 +129,7 @@ public class Storage {
             }
         } catch (IOException e) {
             throw new MattChatBotException(
-                    "I couldn't read your saved tasks from " + filePath + ".");
+                    "I was unable to read your saved list from " + filePath + ".");
         }
         return tasks;
     }

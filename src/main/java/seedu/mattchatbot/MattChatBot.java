@@ -62,9 +62,9 @@ public class MattChatBot {
             tasks = new TaskList(storage.load());
             int skipped = storage.getSkippedLineCount();
             if (skipped > 0) {
-                loadWarning = "I couldn't understand " + skipped + (skipped == 1
-                        ? " line in your saved file, so I skipped it."
-                        : " lines in your saved file, so I skipped them.");
+                loadWarning = "I was unable to make sense of " + skipped + (skipped == 1
+                        ? " line in your saved file, and have set it aside."
+                        : " lines in your saved file, and have set them aside.");
             }
         } catch (MattChatBotException e) {
             tasks = new TaskList();
@@ -161,7 +161,7 @@ public class MattChatBot {
     private void showGreeting() {
         ui.showWelcome();
         if (loadWarning != null) {
-            ui.show(loadWarning, "The tasks I could read are still here.");
+            ui.show(loadWarning, "The entries I could read remain intact.");
         }
     }
 
@@ -264,7 +264,7 @@ public class MattChatBot {
         assert task != null : "Parser returns a task or throws";
         tasks.add(task);
         storage.save(tasks);
-        ui.show("Got it. I've added this task:", "  " + task, countSummary());
+        ui.show("Very good. I have noted it:", "  " + task, countSummary());
     }
 
     /**
@@ -276,7 +276,7 @@ public class MattChatBot {
     private void deleteTask(int index) throws MattChatBotException {
         Task removed = tasks.remove(index);
         storage.save(tasks);
-        ui.show("Noted. I've removed this task:", "  " + removed, countSummary());
+        ui.show("Consider it struck from the list:", "  " + removed, countSummary());
     }
 
     /**
@@ -291,10 +291,10 @@ public class MattChatBot {
         String confirmation;
         if (isDone) {
             task.markAsDone();
-            confirmation = "Nice! I've marked this task as done:";
+            confirmation = "Excellent. I have marked it complete:";
         } else {
             task.markAsNotDone();
-            confirmation = "OK, I've marked this task as not done yet:";
+            confirmation = "Very well. It is outstanding once more:";
         }
         storage.save(tasks);
         ui.show(confirmation, "  " + task);
@@ -316,13 +316,13 @@ public class MattChatBot {
         Task task = tasks.get(index);
         task.applyUpdate(changes);
         storage.save(tasks);
-        ui.show("Got it. I've updated this task:", "  " + task);
+        ui.show("Duly amended:", "  " + task);
     }
 
     /** Prints every stored task, numbered from 1, with its type and status. */
     private void listTasks() {
-        showTasks(tasks.asList(), "Here are the tasks in your list:",
-                "Your list is empty. Add something with "
+        showTasks(tasks.asList(), "Your list, as it stands:",
+                "Your list is quite empty. You might begin with "
                         + Command.TODO.getKeyword() + ", " + Command.DEADLINE.getKeyword()
                         + " or " + Command.EVENT.getKeyword() + ".");
     }
@@ -335,8 +335,8 @@ public class MattChatBot {
     private void listTasksOn(LocalDate date) {
         String shownDate = DateTimes.format(date);
         showTasks(tasks.getTasksOn(date),
-                "Here is what you have on " + shownDate + ":",
-                "Nothing on " + shownDate + ".");
+                "Your engagements for " + shownDate + ":",
+                "Nothing at all on " + shownDate + ".");
     }
 
     /**
@@ -346,8 +346,8 @@ public class MattChatBot {
      */
     private void listMatchingTasks(String keyword) {
         showTasks(tasks.getTasksMatching(keyword),
-                "Here are the matching tasks in your list:",
-                "No tasks match \"" + keyword + "\".");
+                "The entries matching your enquiry:",
+                "Nothing matches \"" + keyword + "\", I'm afraid.");
     }
 
     /**
@@ -390,6 +390,6 @@ public class MattChatBot {
      * {@code Now you have 4 tasks in the list.}
      */
     private String countSummary() {
-        return "Now you have " + tasks.describeSize() + " in the list.";
+        return "You now have " + tasks.describeSize() + " in your list.";
     }
 }
