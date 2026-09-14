@@ -127,4 +127,39 @@ public class StorageTest {
         Files.createDirectories(file.getParent());
         Files.write(file, List.of(lines));
     }
+
+    @Test
+    public void load_damagedLine_reportNamesTheLineAndTheReason() throws Exception {
+        Path file = tempDir.resolve("tasks.txt");
+        Files.write(file, List.of(
+                "T | 0 | read book",
+                "T | 0 | buy milk | eggs",
+                "D | 0 | return book | 2019-10-15 0000"));
+        Storage storage = new Storage(file.toString());
+        assertEquals(2, storage.load().size());
+
+        List<String> reports = storage.getSkippedLineReports();
+        assertEquals(1, reports.size());
+        // The line number matters: it is what lets the user go and fix it.
+        assertTrue(reports.get(0).startsWith("line 2: "), reports.get(0));
+        assertTrue(reports.get(0).contains("Expected 3 fields but found 4"), reports.get(0));
+    }
+
+    @Test
+    public void load_backwardsEventInFile_skippedWithReason() throws Exception {
+        Path file = tempDir.resolve("tasks.txt");
+        Files.write(file, List.of("E | 0 | backwards | 2019-10-15 1800 | 2019-10-15 0900"));
+        Storage storage = new Storage(file.toString());
+        assertTrue(storage.load().isEmpty());
+        assertTrue(storage.getSkippedLineReports().get(0).contains("must end after it starts"));
+    }
+
+    @Test
+    public void load_intactFile_noReports() throws Exception {
+        Path file = tempDir.resolve("tasks.txt");
+        Files.write(file, List.of("T | 0 | read book"));
+        Storage storage = new Storage(file.toString());
+        storage.load();
+        assertTrue(storage.getSkippedLineReports().isEmpty());
+    }
 }

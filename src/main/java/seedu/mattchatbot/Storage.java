@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import seedu.mattchatbot.task.Deadline;
@@ -51,8 +52,14 @@ public class Storage {
      */
     private final Path filePath;
 
-    /** How many damaged lines the most recent {@link #load()} had to skip. */
-    private int skippedLineCount = 0;
+    /**
+     * What was wrong with each line the most recent {@link #load()} skipped.
+     * <p>
+     * The reasons are kept, not just the count. A file that has been edited by
+     * hand is the likeliest way to end up here, and "one line was unreadable"
+     * gives the user nothing to go and fix.
+     */
+    private final List<String> skippedLineReports = new ArrayList<>();
 
     /**
      * Creates a Storage reading and writing the given file.
@@ -113,9 +120,11 @@ public class Storage {
         if (!Files.exists(filePath)) {
             return tasks;
         }
-        skippedLineCount = 0;
+        skippedLineReports.clear();
         try {
+            int lineNumber = 0;
             for (String line : Files.readAllLines(filePath)) {
+                lineNumber++;
                 if (line.isBlank()) {
                     continue;
                 }
@@ -124,7 +133,7 @@ public class Storage {
                 } catch (MattChatBotException e) {
                     // One damaged line should not cost the user every other
                     // task, so skip it and carry on with the rest of the file.
-                    skippedLineCount++;
+                    skippedLineReports.add("line " + lineNumber + ": " + e.getMessage());
                 }
             }
         } catch (IOException e) {
@@ -217,12 +226,21 @@ public class Storage {
     }
 
     /**
-     * Returns how many damaged lines the most recent {@link #load()} skipped,
-     * so the chatbot can tell the user that some saved tasks were lost.
+     * Returns how many damaged lines the most recent {@link #load()} skipped.
      *
      * @return the number of lines skipped, zero if the file was intact
      */
     public int getSkippedLineCount() {
-        return skippedLineCount;
+        return skippedLineReports.size();
+    }
+
+    /**
+     * Returns what was wrong with each line the most recent {@link #load()}
+     * skipped, so the chatbot can tell the user what to go and fix.
+     *
+     * @return one report per skipped line, naming the line and the problem
+     */
+    public List<String> getSkippedLineReports() {
+        return List.copyOf(skippedLineReports);
     }
 }

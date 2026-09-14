@@ -104,6 +104,19 @@ public class TaskList {
     }
 
     /**
+     * Returns whether the list already holds the same task.
+     * <p>
+     * Sameness is the task's own idea of it, so that what counts as a repeat
+     * stays with the type that knows which of its parts matter.
+     *
+     * @param task the task being considered
+     * @return true if an entry like it is already in the list
+     */
+    public boolean contains(Task task) {
+        return tasks.stream().anyMatch(task::isSameTask);
+    }
+
+    /**
      * Returns the tasks the given test accepts, in list order.
      * <p>
      * Holds the one thing every search has in common -- walk the list, keep

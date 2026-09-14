@@ -62,6 +62,16 @@ public class Deadline extends Task {
         return by.toLocalDate().equals(date);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Two deadlines are the same only if they also fall due at the same time.
+     */
+    @Override
+    public boolean isSameTask(Task other) {
+        return super.isSameTask(other) && by.equals(((Deadline) other).by);
+    }
+
     @Override
     public String toFileFormat() {
         return super.toFileFormat() + FIELD_SEPARATOR + DateTimes.toFileString(by);
