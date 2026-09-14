@@ -143,6 +143,24 @@ Checkstyle enforces the SE-EDU Java coding standard using the configuration in
 `config/checkstyle`. It also runs as part of `./gradlew build`, so a style
 violation fails the build rather than waiting to be spotted in review.
 
+## Measuring test coverage
+
+```
+./gradlew jacocoTestReport
+```
+
+That writes an HTML report to `build/reports/jacoco/test/html/index.html`.
+
+The GUI classes are left out of the figure. They are tested by running the
+program rather than by JUnit, so counting them would make the number describe
+how much of the program has a window rather than how much of the testable code
+is tested.
+
+What remains uncovered is, deliberately, of three kinds: the failure branch of
+an `assert`, which never runs while the assertion holds; two defensive branches
+the compiler requires but nothing can reach; and the two entry points that read
+the real save file, which a test has no business touching.
+
 ## Packaging as a JAR
 
 ```
