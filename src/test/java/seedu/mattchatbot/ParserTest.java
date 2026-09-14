@@ -237,4 +237,85 @@ public class ParserTest {
         assertThrows(MattChatBotException.class, () ->
                 Parser.parseUpdateChanges("2 /by notadate"));
     }
+
+    @Test
+    public void parseTodo_descriptionHoldsSeparator_exceptionThrown() {
+        // Without this the entry saves and lists happily, then splits into too
+        // many fields on the next start and is dropped as damaged.
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseTodo("buy milk | eggs"));
+        assertEquals("A description cannot contain \"|\", because that is what separates"
+                + " the fields of the save file. Please write it another way.", e.getMessage());
+    }
+
+    @Test
+    public void parseDeadline_descriptionHoldsSeparator_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseDeadline("a | b /by 2019-10-15"));
+    }
+
+    @Test
+    public void parseEvent_descriptionHoldsSeparator_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("a | b /from 2019-10-15 /to 2019-10-16"));
+    }
+
+    @Test
+    public void parseUpdateChanges_descriptionHoldsSeparator_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseUpdateChanges("2 a | b"));
+    }
+
+    @Test
+    public void parseTodo_runsOfSpaces_squeezedToOne() throws Exception {
+        assertEquals("[T][ ] read the book", Parser.parseTodo("read   the    book").toString());
+    }
+
+    @Test
+    public void parseDeadline_byGivenTwice_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseDeadline("report /by 2019-10-15 /by 2019-12-01"));
+        assertEquals("You have given /by more than once. Please say it just the once,"
+                + " so I know which one you mean.", e.getMessage());
+    }
+
+    @Test
+    public void parseEvent_fromGivenTwice_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("x /from 2019-10-15 /from 2019-10-16 /to 2019-10-17"));
+    }
+
+    @Test
+    public void parseEvent_toGivenTwice_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("x /from 2019-10-15 /to 2019-10-16 /to 2019-10-17"));
+    }
+
+    @Test
+    public void parseEvent_descriptionMentionsToMarker_stillAccepted() throws Exception {
+        // "/to" before the "/from" belongs to the description, so it must not
+        // be counted as a second end time.
+        assertEquals("[E][ ] read /to me (from: Oct 15 2019 to: Oct 16 2019)",
+                Parser.parseEvent("read /to me /from 2019-10-15 /to 2019-10-16").toString());
+    }
+
+    @Test
+    public void parseUpdateChanges_markerGivenTwice_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseUpdateChanges("2 /by 2019-10-15 /by 2019-12-01"));
+    }
+
+    @Test
+    public void parseEvent_endsBeforeItStarts_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("backwards /from 2019-10-15 1800 /to 2019-10-15 0900"));
+        assertEquals("An event must end after it starts, and this one would run from"
+                + " Oct 15 2019, 6:00pm to Oct 15 2019, 9:00am.", e.getMessage());
+    }
+
+    @Test
+    public void parseEvent_startsAndEndsTogether_exceptionThrown() {
+        assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("instant /from 2019-10-15 1400 /to 2019-10-15 1400"));
+    }
 }

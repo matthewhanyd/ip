@@ -127,6 +127,23 @@ public abstract class Task {
     }
 
     /**
+     * Returns whether another task records the same thing as this one.
+     * <p>
+     * Whether it has been done is left out on purpose: an entry already on the
+     * list is a repeat whether or not it has been ticked off. The types that
+     * carry dates widen this to include them, so that the same errand on two
+     * different days is two entries rather than one.
+     *
+     * @param other the task to compare with
+     * @return true if the two record the same thing
+     */
+    public boolean isSameTask(Task other) {
+        return other != null
+                && getTypeIcon().equals(other.getTypeIcon())
+                && description.equals(other.description);
+    }
+
+    /**
      * Returns whether this task happens on the given date.
      * <p>
      * Todos have no date, so the default is false; the task types that do

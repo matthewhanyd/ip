@@ -85,13 +85,45 @@ public class TaskUpdateTest {
     }
 
     @Test
-    public void applyUpdate_dueDateOnEvent_refusedAndNothingChanged() {
+    public void applyUpdate_dueDateOnEvent_refusedAndNothingChanged() throws Exception {
         Event event = new Event("meeting", at(2019, 10, 15, 14), at(2019, 10, 15, 16));
         MattChatBotException e = assertThrows(MattChatBotException.class, () ->
                 event.applyUpdate(new TaskUpdate("changed", at(2019, 12, 1, 0), null, null)));
         assertEquals("An event has no /by. Use /from and /to to amend when it runs.",
                 e.getMessage());
         assertEquals("[E][ ] meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)",
+                event.toString());
+    }
+
+    @Test
+    public void applyUpdate_endMovedBeforeStart_refusedAndNothingChanged() throws Exception {
+        Event event = new Event("meeting", at(2019, 10, 15, 14), at(2019, 10, 15, 16));
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                event.applyUpdate(new TaskUpdate("changed", null, null, at(2019, 10, 15, 9))));
+        assertEquals("An event must end after it starts, and this one would run from"
+                + " Oct 15 2019, 2:00pm to Oct 15 2019, 9:00am.", e.getMessage());
+        // Neither the end time nor the description may have been applied.
+        assertEquals("[E][ ] meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)",
+                event.toString());
+    }
+
+    @Test
+    public void applyUpdate_startMovedAfterEnd_refusedAndNothingChanged() throws Exception {
+        Event event = new Event("meeting", at(2019, 10, 15, 14), at(2019, 10, 15, 16));
+        assertThrows(MattChatBotException.class, () ->
+                event.applyUpdate(new TaskUpdate(null, null, at(2019, 10, 15, 18), null)));
+        assertEquals("[E][ ] meeting (from: Oct 15 2019, 2:00pm to: Oct 15 2019, 4:00pm)",
+                event.toString());
+    }
+
+    @Test
+    public void applyUpdate_bothEventTimesMovedTogether_accepted() throws Exception {
+        // The pair is judged as it would end up, not one end at a time, so a
+        // shift that stays forwards is allowed even though the new start is
+        // after the old end.
+        Event event = new Event("meeting", at(2019, 10, 15, 14), at(2019, 10, 15, 16));
+        event.applyUpdate(new TaskUpdate(null, null, at(2019, 10, 15, 18), at(2019, 10, 15, 20)));
+        assertEquals("[E][ ] meeting (from: Oct 15 2019, 6:00pm to: Oct 15 2019, 8:00pm)",
                 event.toString());
     }
 }

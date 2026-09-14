@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import seedu.mattchatbot.task.Deadline;
 import seedu.mattchatbot.task.Event;
+import seedu.mattchatbot.task.Task;
 import seedu.mattchatbot.task.TaskUpdate;
 import seedu.mattchatbot.task.Todo;
 
@@ -27,6 +28,18 @@ public class Parser {
 
     /** Keyword separating an event's start time from its end time. */
     private static final String KEYWORD_TO = "/to";
+
+    /**
+     * The character the save file keeps between fields, which a description
+     * therefore cannot contain.
+     * <p>
+     * Taken from the save format rather than written out again, so the two
+     * cannot drift apart. Without this rule a description holding the
+     * character saves and lists perfectly well, then splits into too many
+     * fields when read back, and the entry is dropped as damaged -- a task
+     * lost with nothing at the time to suggest anything was wrong.
+     */
+    private static final String RESERVED_CHARACTER = Task.FIELD_SEPARATOR.trim();
 
     /**
      * Every marker an update command may carry.
@@ -81,6 +94,43 @@ public class Parser {
     }
 
     /**
+     * Checks a description the user typed, and tidies its spacing.
+     * <p>
+     * Runs of spaces are squeezed to one, so that entries differing only in
+     * how they were spaced do not read as different entries, and so that what
+     * is saved matches what was shown.
+     *
+     * @param description the description as the user typed it
+     * @return the description with its spacing tidied
+     * @throws MattChatBotException if it holds the save file's separator
+     */
+    private static String checkDescription(String description) throws MattChatBotException {
+        if (description.contains(RESERVED_CHARACTER)) {
+            throw new MattChatBotException("A description cannot contain \""
+                    + RESERVED_CHARACTER + "\", because that is what separates the fields"
+                    + " of the save file. Please write it another way.");
+        }
+        return description.replaceAll("\\s+", " ");
+    }
+
+    /**
+     * Rejects a marker the user has given more than once.
+     *
+     * @param text   the text being read
+     * @param marker the marker to count, e.g. {@code /by}
+     * @param from   where to start looking, so an earlier marker is not counted
+     * @throws MattChatBotException if the marker appears again after that point
+     */
+    private static void checkGivenOnce(String text, String marker, int from)
+            throws MattChatBotException {
+        int first = text.indexOf(marker, from);
+        if (first >= 0 && text.indexOf(marker, first + marker.length()) >= 0) {
+            throw new MattChatBotException("You have given " + marker + " more than once."
+                    + " Please say it just the once, so I know which one you mean.");
+        }
+    }
+
+    /**
      * Builds a todo from the text after the command word.
      *
      * @param argument the description, as the user typed it
@@ -92,7 +142,7 @@ public class Parser {
             throw new MattChatBotException("A todo wants a description. Perhaps: "
                     + Command.TODO.getKeyword() + " borrow book");
         }
-        return new Todo(argument);
+        return new Todo(checkDescription(argument));
     }
 
     /**
@@ -105,6 +155,7 @@ public class Parser {
     public static Deadline parseDeadline(String argument) throws MattChatBotException {
         String example = "Perhaps: " + Command.DEADLINE.getKeyword()
                 + " return book /by 2019-10-15";
+        checkGivenOnce(argument, KEYWORD_BY, 0);
         int byAt = argument.indexOf(KEYWORD_BY);
         if (byAt < 0) {
             throw new MattChatBotException(
@@ -120,7 +171,7 @@ public class Parser {
             throw new MattChatBotException(
                     "A deadline wants a date or time after the /by. " + example);
         }
-        return new Deadline(description, DateTimes.parse(by));
+        return new Deadline(checkDescription(description), DateTimes.parse(by));
     }
 
     /**
@@ -134,6 +185,7 @@ public class Parser {
     public static Event parseEvent(String argument) throws MattChatBotException {
         String example = "Perhaps: " + Command.EVENT.getKeyword()
                 + " project meeting /from 2019-10-15 1400 /to 2019-10-15 1600";
+        checkGivenOnce(argument, KEYWORD_FROM, 0);
         int fromAt = argument.indexOf(KEYWORD_FROM);
         if (fromAt < 0) {
             throw new MattChatBotException(
@@ -141,6 +193,9 @@ public class Parser {
         }
         // Look for /to only after /from, so that a description mentioning "/to"
         // does not get mistaken for the end time.
+        // Counted only after the /from, so that a description mentioning "/to"
+        // is not mistaken for a second end time.
+        checkGivenOnce(argument, KEYWORD_TO, fromAt + KEYWORD_FROM.length());
         int toAt = argument.indexOf(KEYWORD_TO, fromAt + KEYWORD_FROM.length());
         if (toAt < 0) {
             throw new MattChatBotException(
@@ -161,7 +216,8 @@ public class Parser {
             throw new MattChatBotException(
                     "An event wants an end time after the /to. " + example);
         }
-        return new Event(description, DateTimes.parse(from), DateTimes.parse(to));
+        return new Event(checkDescription(description), DateTimes.parse(from),
+                DateTimes.parse(to));
     }
 
     /**
@@ -235,10 +291,13 @@ public class Parser {
      */
     public static TaskUpdate parseUpdateChanges(String argument) throws MattChatBotException {
         String changes = parseArgument(argument);
+        for (String marker : UPDATE_MARKERS) {
+            checkGivenOnce(changes, marker, 0);
+        }
         int firstMarker = indexOfNextMarker(changes, 0);
         String description = firstMarker < 0 ? changes : changes.substring(0, firstMarker);
         TaskUpdate update = new TaskUpdate(
-                blankToNull(description),
+                checkedOrNull(description),
                 parseMarkerValue(changes, KEYWORD_BY),
                 parseMarkerValue(changes, KEYWORD_FROM),
                 parseMarkerValue(changes, KEYWORD_TO));
@@ -292,14 +351,15 @@ public class Parser {
     }
 
     /**
-     * Returns the text with surrounding spaces removed, or null if it is blank.
+     * Returns a checked, tidied description, or null if none was given.
      *
-     * @param text the text to tidy
-     * @return the trimmed text, or null if nothing was left
+     * @param text the text before the first marker
+     * @return the description, or null if nothing was there to change
+     * @throws MattChatBotException if it holds the save file's separator
      */
-    private static String blankToNull(String text) {
+    private static String checkedOrNull(String text) throws MattChatBotException {
         String trimmed = text.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        return trimmed.isEmpty() ? null : checkDescription(trimmed);
     }
 
     /**

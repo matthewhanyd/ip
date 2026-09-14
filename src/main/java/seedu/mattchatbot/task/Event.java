@@ -28,10 +28,32 @@ public class Event extends Task {
      * @param from        when it starts
      * @param to          when it ends
      */
-    public Event(String description, LocalDateTime from, LocalDateTime to) {
+    public Event(String description, LocalDateTime from, LocalDateTime to)
+            throws MattChatBotException {
         super(description);
+        checkRunsForwards(from, to);
         this.from = from;
         this.to = to;
+    }
+
+    /**
+     * Rejects a pair of times that an event cannot run between.
+     * <p>
+     * Checked here rather than in the parser so that the rule holds however an
+     * event is built: typed in, amended later, or read back from a save file
+     * that has been edited by hand.
+     *
+     * @param from when it would start
+     * @param to   when it would end
+     * @throws MattChatBotException if it would not end after it starts
+     */
+    private static void checkRunsForwards(LocalDateTime from, LocalDateTime to)
+            throws MattChatBotException {
+        if (!from.isBefore(to)) {
+            throw new MattChatBotException("An event must end after it starts, and this one"
+                    + " would run from " + DateTimes.format(from)
+                    + " to " + DateTimes.format(to) + ".");
+        }
     }
 
     @Override
@@ -57,13 +79,14 @@ public class Event extends Task {
             throw new MattChatBotException("An event has no /by. "
                     + "Use /from and /to to amend when it runs.");
         }
+        // Worked out before anything is changed, so that an amendment which
+        // would turn the event backwards leaves it exactly as it was.
+        LocalDateTime newFrom = update.hasFrom() ? update.from() : from;
+        LocalDateTime newTo = update.hasTo() ? update.to() : to;
+        checkRunsForwards(newFrom, newTo);
         applyDescription(update);
-        if (update.hasFrom()) {
-            from = update.from();
-        }
-        if (update.hasTo()) {
-            to = update.to();
-        }
+        from = newFrom;
+        to = newTo;
     }
 
     /**
@@ -77,6 +100,18 @@ public class Event extends Task {
         LocalDate start = from.toLocalDate();
         LocalDate end = to.toLocalDate();
         return !date.isBefore(start) && !date.isAfter(end);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Two events are the same only if they also run between the same times.
+     */
+    @Override
+    public boolean isSameTask(Task other) {
+        return super.isSameTask(other)
+                && from.equals(((Event) other).from)
+                && to.equals(((Event) other).to);
     }
 
     @Override

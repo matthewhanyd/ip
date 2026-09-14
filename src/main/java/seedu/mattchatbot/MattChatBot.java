@@ -2,6 +2,8 @@ package seedu.mattchatbot;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -60,16 +62,32 @@ public class MattChatBot {
         storage = new Storage(filePath);
         try {
             tasks = new TaskList(storage.load());
-            int skipped = storage.getSkippedLineCount();
-            if (skipped > 0) {
-                loadWarning = "I was unable to make sense of " + skipped + (skipped == 1
-                        ? " line in your saved file, and have set it aside."
-                        : " lines in your saved file, and have set them aside.");
+            List<String> reports = storage.getSkippedLineReports();
+            if (!reports.isEmpty()) {
+                loadWarning = describeSkippedLines(reports);
             }
         } catch (MattChatBotException e) {
             tasks = new TaskList();
             loadWarning = e.getMessage();
         }
+    }
+
+    /**
+     * Describes the lines of the save file that could not be read, and why.
+     *
+     * @param reports one report per skipped line
+     * @return the wording to show alongside the greeting
+     */
+    private static String describeSkippedLines(List<String> reports) {
+        String heading = reports.size() == 1
+                ? "I was unable to make sense of one line in your saved file,"
+                        + " and have set it aside:"
+                : "I was unable to make sense of " + reports.size()
+                        + " lines in your saved file, and have set them aside:";
+        return heading + System.lineSeparator()
+                + reports.stream()
+                        .map(report -> "  " + report)
+                        .collect(Collectors.joining(System.lineSeparator()));
     }
 
     /**
@@ -262,6 +280,10 @@ public class MattChatBot {
         // Parser either returns a task or throws, so null here would mean a
         // parse method had gained a silent failure path.
         assert task != null : "Parser returns a task or throws";
+        if (tasks.contains(task)) {
+            throw new MattChatBotException("That is already on your list:"
+                    + System.lineSeparator() + "  " + task);
+        }
         tasks.add(task);
         storage.save(tasks);
         ui.show("Very good. I have noted it:", "  " + task, countSummary());
