@@ -1,6 +1,7 @@
 package seedu.mattchatbot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -161,5 +162,41 @@ public class StorageTest {
         Storage storage = new Storage(file.toString());
         storage.load();
         assertTrue(storage.getSkippedLineReports().isEmpty());
+    }
+
+    @Test
+    public void load_blankDescription_skippedWithReason() throws Exception {
+        Path file = tempDir.resolve("tasks.txt");
+        // Blank in the middle rather than at the end: a trailing empty field is
+        // dropped by split, so it would fail the field count instead.
+        Files.write(file, List.of("D | 0 |  | 2019-10-15 0000"));
+        Storage storage = new Storage(file.toString());
+        assertTrue(storage.load().isEmpty());
+        assertTrue(storage.getSkippedLineReports().get(0).contains("Task has no description"),
+                storage.getSkippedLineReports().get(0));
+    }
+
+    @Test
+    public void save_pathIsAFolder_exceptionMentionsThePath() throws Exception {
+        // Standing in for any reason the file cannot be written: no permission,
+        // a full disk, a name already taken by something else.
+        Path blocked = tempDir.resolve("blocked.txt");
+        Files.createDirectory(blocked);
+        Storage storage = new Storage(blocked.toString());
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                storage.save(tasks));
+        assertTrue(e.getMessage().startsWith("I was unable to save your list to"), e.getMessage());
+    }
+
+    @Test
+    public void load_pathIsAFolder_exceptionMentionsThePath() throws Exception {
+        Path blocked = tempDir.resolve("blocked.txt");
+        Files.createDirectory(blocked);
+        Storage storage = new Storage(blocked.toString());
+        MattChatBotException e = assertThrows(MattChatBotException.class, storage::load);
+        assertTrue(e.getMessage().startsWith("I was unable to read your saved list from"),
+                e.getMessage());
     }
 }

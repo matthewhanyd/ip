@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'jacoco'
     id 'com.gradleup.shadow' version '9.5.1'
 }
 
@@ -53,6 +54,28 @@ test {
         showCauses = true
         showStackTraces = true
         showStandardStreams = false
+    }
+}
+
+jacoco {
+    // Needs a build new enough to read Java 25 class files.
+    toolVersion = '0.8.14'
+}
+
+jacocoTestReport {
+    dependsOn test
+    // The increment allows leaving GUI code to manual testing. Counting it
+    // here would make the figure describe how much of the program has a
+    // window rather than how much of the testable code is tested.
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: ['seedu/mattchatbot/gui/**',
+                                        'seedu/mattchatbot/Launcher*'])
+        }))
+    }
+    reports {
+        xml.required = true
+        html.required = true
     }
 }
 

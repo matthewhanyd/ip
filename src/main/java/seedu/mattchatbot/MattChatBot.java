@@ -97,7 +97,23 @@ public class MattChatBot {
      * @return a chatbot ready to answer {@link #getResponse(String)}
      */
     public static MattChatBot forGui() {
-        return new MattChatBot(SAVE_FILE, Ui.forGui());
+        return forGui(SAVE_FILE);
+    }
+
+    /**
+     * Creates a chatbot on the given save file whose replies are returned as
+     * text rather than printed.
+     * <p>
+     * The file is passed in for the same reason {@link Storage} takes one: so
+     * that a caller which is not the real application -- a test, or a second
+     * window on a different list -- can point somewhere other than the file
+     * the user's own tasks live in.
+     *
+     * @param filePath where to load from and save to
+     * @return a chatbot ready to answer {@link #getResponse(String)}
+     */
+    public static MattChatBot forGui(String filePath) {
+        return new MattChatBot(filePath, Ui.forGui());
     }
 
     /**

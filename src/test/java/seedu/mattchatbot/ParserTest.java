@@ -3,6 +3,7 @@ package seedu.mattchatbot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 
@@ -317,5 +318,37 @@ public class ParserTest {
     public void parseEvent_startsAndEndsTogether_exceptionThrown() {
         assertThrows(MattChatBotException.class, () ->
                 Parser.parseEvent("instant /from 2019-10-15 1400 /to 2019-10-15 1400"));
+    }
+
+    @Test
+    public void parseEvent_missingFrom_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("meeting /to 2019-10-15"));
+        assertTrue(e.getMessage().startsWith("An event wants a /from, so I know when it begins."),
+                e.getMessage());
+    }
+
+    @Test
+    public void parseEvent_missingDescription_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("/from 2019-10-15 /to 2019-10-16"));
+        assertTrue(e.getMessage().startsWith("An event wants a description before the /from."),
+                e.getMessage());
+    }
+
+    @Test
+    public void parseEvent_nothingAfterFrom_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("meeting /from /to 2019-10-16"));
+        assertTrue(e.getMessage().startsWith("An event wants a start time after the /from."),
+                e.getMessage());
+    }
+
+    @Test
+    public void parseEvent_nothingAfterTo_exceptionThrown() {
+        MattChatBotException e = assertThrows(MattChatBotException.class, () ->
+                Parser.parseEvent("meeting /from 2019-10-15 /to"));
+        assertTrue(e.getMessage().startsWith("An event wants an end time after the /to."),
+                e.getMessage());
     }
 }
